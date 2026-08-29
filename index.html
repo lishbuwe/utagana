@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="うたがな">
+<title>うたがな</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="uta.PNG?v=2">
+<link rel="apple-touch-icon" href="uta.PNG?v=2">
+<meta name="theme-color" content="#ec6f91">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Maru+Gothic:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#fff8fa;
+    --bg-panel:#ffedf2;
+    --bg-panel-hi:#ffdce6;
+    --ink:#3a2e33;
+    --ink-dim:#9c7c86;
+    --ink-faint:#c9a8b2;
+    --gold:#ec6f91;
+    --gold-dim:#ec6f9126;
+    --plum:#c4485c;
+    --on-accent:#ffffff;
+    --line:rgba(58,46,51,0.10);
+    --line-hi:rgba(58,46,51,0.20);
+    --shadow-accent:#c24e70;
+    --shadow-panel:#e3b9c5;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overscroll-behavior:none;}
+  body{
+    background:radial-gradient(ellipse at 20% -10%, #ffffff 0%, var(--bg-deep) 60%);
+    color:var(--ink);
+    font-family:'Zen Maru Gothic','Noto Sans SC',sans-serif;
+    min-height:100vh;
+    min-height:100dvh;
+    -webkit-font-smoothing:antialiased;
+    -webkit-text-size-adjust:100%;
+    overscroll-behavior-y:none;
+  }
+  .mono{font-family:'Space Mono',monospace;}
+  .mincho{font-family:'Shippori Mincho',serif;}
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea,select{font-family:inherit;}
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
+    outline:2px solid var(--gold);outline-offset:2px;
+  }
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px clamp(16px,4vw,48px);
+    padding-top:max(16px, env(safe-area-inset-top));
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;gap:12px;
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,248,250,0.92);backdrop-filter:blur(8px);
+    box-shadow:0 2px 10px rgba(58,46,51,.05);
+  }
+  .brand{display:flex;align-items:baseline;gap:14px;cursor:pointer;border-radius:10px;padding:2px 4px;margin:-2px -4px;transition:transform .08s ease;}
+  .brand:active{transform:translateY(1px);}
+  .brand h1{font-family:'Shippori Mincho',serif;font-weight:700;font-size:clamp(20px,3.2vw,26px);letter-spacing:.08em;margin:0;}
+  .brand span.sub{color:var(--ink-dim);font-size:11.5px;letter-spacing:.1em;}
+  .header-right{display:flex;align-items:center;gap:14px;}
+
+  /* ---- cover / home page ---- */
+  .cover-page{
+    min-height:calc(100vh - 76px);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:40px 20px;gap:26px;
+  }
+  .cover-title{font-family:'Shippori Mincho',serif;font-weight:700;font-size:clamp(38px,8vw,64px);letter-spacing:.1em;}
+  .cover-sub{color:var(--ink-dim);font-size:14px;letter-spacing:.1em;margin-top:-14px;}
+  .cover-stats{display:flex;gap:28px;color:var(--ink-faint);font-size:12px;font-family:'Space Mono',monospace;}
+  .cover-stats b{color:var(--gold);font-size:16px;display:block;font-family:'Zen Maru Gothic',sans-serif;}
+  .cover-cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+  .cover-card{
+    width:200px;background:var(--bg-panel);border:1px solid var(--line);border-radius:20px;padding:26px 20px;
+    box-shadow:0 4px 0 var(--shadow-panel), 0 6px 14px rgba(58,46,51,.06);
+    transition:transform .08s ease, box-shadow .08s ease;
+    appearance:none;-webkit-appearance:none;color:var(--ink);font-family:'Zen Maru Gothic',sans-serif;
+  }
+  .cover-card:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow-panel);}
+  .cover-card .cc-icon{font-size:30px;margin-bottom:10px;color:var(--gold);}
+  .cover-card .cc-title{font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px;color:var(--ink);}
+  .cover-card .cc-desc{font-size:12px;color:var(--ink-dim);}
+
+  .page-tabs{display:flex;gap:6px;background:var(--bg-panel);border:1px solid var(--line);border-radius:999px;padding:4px;}
+  .page-tab{background:transparent;border:none;color:var(--ink-dim);padding:7px 18px;border-radius:999px;font-size:13px;letter-spacing:.04em;transition:transform .08s ease, background .15s;}
+  .page-tab.active{background:var(--gold);color:var(--on-accent);font-weight:700;box-shadow:0 2px 0 var(--shadow-accent);}
+  .page-tab:active{transform:translateY(2px);}
+
+  .icon-btn{
+    background:var(--bg-panel);border:1px solid var(--line);color:var(--ink-dim);
+    width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    transition:border-color .2s, color .2s, transform .08s ease, box-shadow .08s ease;flex:0 0 auto;
+    box-shadow:0 2px 0 var(--shadow-panel);
+  }
+  .icon-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .icon-btn:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+
+  main{display:block;min-height:calc(100vh - 76px);}
+
+  /* ---- kana page ---- */
+  .kana-page{display:grid;grid-template-columns:minmax(280px,420px) 1fr;gap:1px;background:var(--line);}
+  @media (max-width:860px){ .kana-page{grid-template-columns:1fr;} }
+  .pane{background:var(--bg-deep);padding:clamp(14px,2.4vw,26px);}
+
+  .progress-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;color:var(--ink-dim);}
+  .progress-bar{flex:1;height:5px;border-radius:999px;background:var(--bg-panel);overflow:hidden;}
+  .progress-fill{height:100%;background:var(--gold);border-radius:999px;transition:width .4s ease;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .tab-btn{background:var(--bg-panel);border:1px solid var(--line);color:var(--ink-dim);padding:8px 15px;border-radius:999px;font-size:14px;letter-spacing:.04em;transition:transform .08s ease, box-shadow .08s ease, border-color .15s, color .15s;box-shadow:0 2px 0 var(--shadow-panel);}
+  .tab-btn.active{background:var(--gold);color:var(--on-accent);border-color:var(--gold);font-weight:700;box-shadow:0 2px 0 var(--shadow-accent);}
+  .tab-btn:not(.active):hover{border-color:var(--line-hi);color:var(--ink);}
+  .tab-btn:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+  .tab-btn.active:active{box-shadow:0 0 0 var(--shadow-accent);}
+
+  .kgrid{display:grid;gap:7px;}
+  .klabel{display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:13px;color:var(--ink-faint);}
+  .klabel.row{justify-content:flex-end;padding-right:4px;}
+  .kbtn{
+    position:relative;background:var(--bg-panel);border:1px solid var(--line);color:var(--ink);border-radius:16px;
+    aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:clamp(17px,2.4vw,21px);
+    transition:transform .08s ease, border-color .15s, background .15s, box-shadow .08s ease;
+    box-shadow:0 3px 0 var(--shadow-panel), 0 4px 8px rgba(58,46,51,.06);
+  }
+  .kbtn.empty{visibility:hidden;pointer-events:none;box-shadow:none;}
+  .kbtn:hover{border-color:var(--line-hi);}
+  .kbtn:active{transform:translateY(3px);box-shadow:0 0 0 var(--shadow-panel);}
+  .kbtn.has-hits{box-shadow:inset 0 0 0 1px var(--gold-dim), 0 3px 0 var(--shadow-panel), 0 4px 8px rgba(58,46,51,.06);}
+  .kbtn.has-hits::after{content:'';position:absolute;bottom:6px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--gold);}
+  .kbtn.selected{background:var(--gold);color:var(--on-accent);border-color:var(--gold);box-shadow:0 3px 0 var(--shadow-accent);}
+  .kbtn.selected:active{box-shadow:0 0 0 var(--shadow-accent);}
+  .kbtn.selected::after{background:var(--on-accent);}
+  .kbtn.pulse{box-shadow:0 0 0 6px var(--gold-dim);}
+
+  .detail-empty{color:var(--ink-dim);border:1px dashed var(--line);border-radius:var(--radius);padding:40px 20px;text-align:center;}
+  .detail-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px;}
+  #detailPane{scroll-margin-top:86px;}
+  .detail-kana{font-size:56px;font-family:'Shippori Mincho',serif;line-height:1;}
+  .detail-romaji{font-family:'Space Mono',monospace;color:var(--gold);font-size:16px;}
+  .detail-sec-title{font-size:12px;letter-spacing:.1em;color:var(--ink-faint);margin:22px 0 10px;text-transform:uppercase;}
+  .word-chip{display:inline-flex;align-items:baseline;gap:8px;background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:8px 12px;margin:0 8px 8px 0;appearance:none;-webkit-appearance:none;color:var(--ink);font-family:inherit;cursor:pointer;text-align:left;box-shadow:0 2px 0 var(--shadow-panel);transition:transform .08s ease, box-shadow .08s ease, border-color .15s;}
+  .word-chip:hover{border-color:var(--gold);}
+  .word-chip:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+  .word-chip .w-text{font-size:16px;}
+  .word-chip .w-reading{font-size:11px;color:var(--ink-dim);}
+  .word-chip .w-gloss{font-size:12.5px;color:var(--ink-dim);border-left:1px solid var(--line-hi);padding-left:8px;margin-left:2px;}
+  .line-card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+  .line-card .lc-jp{font-size:15px;margin-bottom:4px;}
+  .line-card .lc-zh{font-size:12.5px;color:var(--ink-dim);margin-bottom:8px;}
+  .line-card .lc-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink-faint);}
+  .lc-jump{background:var(--bg-deep);border:1px solid var(--line);color:var(--ink-dim);border-radius:999px;padding:4px 12px;font-size:11px;box-shadow:0 2px 0 var(--shadow-panel);transition:transform .08s ease, box-shadow .08s ease, border-color .15s, color .15s;}
+  .lc-jump:hover{border-color:var(--gold);color:var(--gold);}
+  .lc-jump:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+
+  /* ---- lyrics page ---- */
+  .lyrics-page{padding:clamp(14px,2.4vw,26px) clamp(16px,4vw,48px);}
+  .toggle-line{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-dim);margin-bottom:14px;}
+  .toggle-line input{accent-color:var(--gold);}
+  .songlist{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:22px;}
+  .song-chip{flex:0 0 auto;background:var(--bg-panel);border:1px solid var(--line);padding:9px 16px;border-radius:999px;font-size:13px;color:var(--ink-dim);white-space:nowrap;box-shadow:0 2px 0 var(--shadow-panel);transition:transform .08s ease, box-shadow .08s ease, border-color .15s, color .15s;}
+  .song-chip.active{border-color:var(--gold);color:var(--gold);background:var(--bg-panel-hi);}
+  .song-chip:hover{color:var(--ink);}
+  .song-chip:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+  .add-song-chip{flex:0 0 auto;background:transparent;border:1px dashed var(--line-hi);color:var(--ink-dim);padding:9px 16px;border-radius:999px;font-size:13px;transition:transform .08s ease;}
+  .add-song-chip:hover{color:var(--gold);border-color:var(--gold);}
+  .add-song-chip:active{transform:translateY(2px);}
+
+  .empty-state{border:1px dashed var(--line);border-radius:var(--radius);padding:40px 20px;text-align:center;color:var(--ink-dim);}
+  .empty-state button{margin-top:14px;background:var(--gold);color:var(--on-accent);border:none;padding:10px 22px;border-radius:999px;font-weight:700;font-size:13.5px;box-shadow:0 3px 0 var(--shadow-accent);transition:transform .08s ease, box-shadow .08s ease;}
+  .empty-state button:active{transform:translateY(3px);box-shadow:0 0 0 var(--shadow-accent);}
+
+  .lyrics{max-width:680px;}
+  .lyrics .song-meta{margin-bottom:20px;}
+  .sm-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .lyrics .song-meta h2{font-family:'Shippori Mincho',serif;font-size:22px;margin:0;}
+  .delete-song-btn{background:transparent;border:1px solid var(--line);color:var(--ink-faint);border-radius:999px;padding:4px 12px;font-size:11.5px;transition:border-color .15s, color .15s;}
+  .delete-song-btn:hover{border-color:var(--plum);color:var(--plum);}
+  .lyrics .song-meta .artist{color:var(--ink-dim);font-size:13px;margin-top:2px;}
+  .lyrics-line{margin-bottom:6px;padding:10px 12px;border-radius:10px;transition:background .3s;}
+  .lyrics-line.pulse-line{background:var(--gold-dim);}
+  .lyrics-line .jp-row{line-height:2.5;font-size:19px;}
+  ruby{position:relative;cursor:pointer;border-radius:4px;padding:0 1px;}
+  ruby:hover{background:var(--bg-panel-hi);}
+  ruby rt{font-family:'Zen Maru Gothic',sans-serif;font-size:10px;color:var(--ink-dim);letter-spacing:0;user-select:none;}
+  .tok-plain{cursor:pointer;border-radius:4px;padding:0 1px;}
+  .tok-plain:hover{background:var(--bg-panel-hi);}
+  .tok-glow{background:var(--gold-dim);box-shadow:inset 0 0 0 1px var(--gold);}
+  .romaji-row{display:none;color:var(--ink-faint);font-size:12px;margin-top:-4px;}
+  .zh-row{color:var(--ink-dim);font-size:13.5px;margin-top:2px;margin-bottom:16px;}
+  .show-romaji .romaji-row{display:block;}
+
+  /* ---- token popover ---- */
+  .popover{position:fixed;z-index:60;background:var(--bg-panel-hi);border:1px solid var(--line-hi);border-radius:10px;padding:12px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45);min-width:180px;font-size:13px;}
+  .popover .pv-reading{font-size:17px;margin-bottom:2px;}
+  .popover .pv-gloss{color:var(--ink);font-size:12.5px;margin-bottom:6px;}
+  .popover .pv-romaji{color:var(--ink-dim);font-family:'Space Mono',monospace;font-size:12px;margin-bottom:10px;}
+  .popover .pv-kanas{display:flex;gap:6px;flex-wrap:wrap;}
+  .pv-kana-btn{background:var(--bg-panel);border:1px solid var(--line);color:var(--ink);padding:5px 10px;border-radius:10px;font-size:13px;box-shadow:0 2px 0 var(--shadow-panel);transition:transform .08s ease, box-shadow .08s ease, border-color .15s, color .15s;}
+  .pv-kana-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .pv-kana-btn:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+
+  /* ---- modals ---- */
+  .overlay{position:fixed;inset:0;background:rgba(8,9,13,.68);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:80;padding:20px;}
+  .modal{background:var(--bg-panel);border:1px solid var(--line-hi);border-radius:14px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;padding:26px;}
+  .modal h3{font-family:'Shippori Mincho',serif;margin:0 0 18px;font-size:19px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;color:var(--ink-dim);margin-bottom:6px;}
+  .field input[type=text],.field input[type=password],.field textarea{width:100%;background:var(--bg-deep);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:14px;resize:vertical;}
+  .field textarea{min-height:140px;line-height:1.7;}
+  .field input:focus,.field textarea:focus{border-color:var(--gold);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
+  .btn{border:1px solid var(--line);background:var(--bg-deep);color:var(--ink-dim);padding:9px 18px;border-radius:999px;font-size:13.5px;box-shadow:0 2px 0 var(--shadow-panel);transition:transform .08s ease, box-shadow .08s ease;}
+  .btn:hover{color:var(--ink);border-color:var(--line-hi);}
+  .btn:active{transform:translateY(2px);box-shadow:0 0 0 var(--shadow-panel);}
+  .btn.primary{background:var(--gold);color:var(--on-accent);border-color:var(--gold);font-weight:700;box-shadow:0 3px 0 var(--shadow-accent);}
+  .btn.primary:hover{opacity:.92;}
+  .btn.primary:active{transform:translateY(3px);box-shadow:0 0 0 var(--shadow-accent);}
+  .btn.primary:disabled{opacity:.5;pointer-events:none;}
+  .radio-row{display:flex;flex-direction:column;gap:8px;}
+  .radio-opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13.5px;}
+  .radio-opt.selected{border-color:var(--gold);}
+  .radio-opt input{accent-color:var(--gold);}
+  .radio-opt .tag{margin-left:auto;font-size:11px;color:var(--ink-faint);}
+  .loading-row{display:flex;align-items:center;gap:10px;color:var(--ink-dim);font-size:13.5px;margin-top:4px;}
+  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid var(--line-hi);border-top-color:var(--gold);animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  #toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .toast{background:var(--bg-panel-hi);border:1px solid var(--line-hi);color:var(--ink);padding:10px 18px;border-radius:999px;font-size:13px;box-shadow:0 8px 22px rgba(0,0,0,.4);animation:toastIn .25s ease;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  ::selection{background:var(--gold-dim);}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand" id="brandHome" title="返回封面">
+    <h1>うたがな</h1>
+    <span class="sub">五十音 × 你的歌单</span>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn" id="homeBtn" title="封面" aria-label="返回封面">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+    </button>
+    <div class="page-tabs" id="pageTabs">
+      <button class="page-tab" data-page="kana">假名</button>
+      <button class="page-tab" data-page="lyrics">歌词</button>
+    </div>
+    <button class="icon-btn" id="settingsBtn" title="设置" aria-label="设置">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="mainArea"></main>
+
+<div id="modalRoot"></div>
+<div id="toast-wrap"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===================== 假名表数据 ===================== */
+  var SEION = [
+    ['あ','い','う','え','お'],['か','き','く','け','こ'],['さ','し','す','せ','そ'],
+    ['た','ち','つ','て','と'],['な','に','ぬ','ね','の'],['は','ひ','ふ','へ','ほ'],
+    ['ま','み','む','め','も'],['や',null,'ゆ',null,'よ'],['ら','り','る','れ','ろ'],
+    ['わ',null,null,null,'を'],['ん',null,null,null,null]
+  ];
+  var DAKU = [
+    ['が','ぎ','ぐ','げ','ご'],['ざ','じ','ず','ぜ','ぞ'],['だ','ぢ','づ','で','ど'],
+    ['ば','び','ぶ','べ','ぼ'],['ぱ','ぴ','ぷ','ぺ','ぽ']
+  ];
+  var YOUON_BASES = ['き','ぎ','し','じ','ち','に','ひ','び','ぴ','み','り'];
+  var YOUON_SUFFIX = ['ゃ','ゅ','ょ'];
+  var YOUON = YOUON_BASES.map(function(b){ return YOUON_SUFFIX.map(function(s){ return b+s; }); });
+
+  var ROMAJI_MAP = {
+    'あ':'a','い':'i','う':'u','え':'e','お':'o','か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+    'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so','た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+    'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no','は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+    'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo','や':'ya','ゆ':'yu','よ':'yo',
+    'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro','わ':'wa','を':'wo','ん':'n',
+    'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go','ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+    'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do','ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+    'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po'
+  };
+  YOUON_BASES.forEach(function(b){
+    YOUON_SUFFIX.forEach(function(s){
+      var combo = b+s;
+      var baseR = ROMAJI_MAP[b].replace(/i$/,'');
+      var sufR = {'ゃ':'ya','ゅ':'yu','ょ':'yo'}[s];
+      ROMAJI_MAP[combo] = baseR + sufR;
+    });
+  });
+
+  var ROW_LABELS = {
+    sei: ['','k','s','t','n','h','m','y','r','w','n'],
+    daku: ['g','z','d','b','p'],
+    youon: ['ky','gy','sh','j','ch','ny','hy','by','py','my','ry']
+  };
+  var COL_LABELS = {
+    sei: ['a','i','u','e','o'],
+    daku: ['a','i','u','e','o'],
+    youon: ['ya','yu','yo']
+  };
+
+  var ALL_VALID_KANA = {};
+  [SEION, DAKU, YOUON].forEach(function(grid){
+    grid.forEach(function(row){ row.forEach(function(k){ if(k) ALL_VALID_KANA[k]=true; }); });
+  });
+  var TOTAL_KANA_COUNT = Object.keys(ALL_VALID_KANA).length;
+
+  function tabOf(kana){
+    if (SEION.some(function(r){return r.indexOf(kana)>-1;})) return 'sei';
+    if (DAKU.some(function(r){return r.indexOf(kana)>-1;})) return 'daku';
+    if (YOUON.some(function(r){return r.indexOf(kana)>-1;})) return 'youon';
+    return null;
+  }
+
+  /* ===================== 预置歌曲数据 ===================== */
+  var PRELOADED_SONGS = [{"id": "eva", "title": "残酷な天使のテーゼ", "artist": "高橋洋子", "lines": [{"zh": "如同残酷的天使一般", "tokens": [{"text": "残酷な", "reading": "ざんこくな", "romaji": "zankoku na", "gloss": "残酷的", "kanaChars": ["ざ", "ん", "こ", "く", "な"]}, {"text": "天使", "reading": "てんし", "romaji": "tenshi", "gloss": "天使", "kanaChars": ["て", "ん", "し"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ように", "reading": "ように", "romaji": "you ni", "gloss": "像…一样", "kanaChars": ["よ", "う", "に"]}]}, {"zh": "少年啊 化作神话吧", "tokens": [{"text": "少年", "reading": "しょうねん", "romaji": "shounen", "gloss": "少年", "kanaChars": ["しょ", "う", "ね", "ん"]}, {"text": "よ", "reading": "よ", "romaji": "yo", "gloss": "啊（呼唤）", "kanaChars": ["よ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "神話", "reading": "しんわ", "romaji": "shinwa", "gloss": "神话", "kanaChars": ["し", "ん", "わ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "变成…", "kanaChars": ["に"]}, {"text": "なれ", "reading": "なれ", "romaji": "nare", "gloss": "成为吧", "kanaChars": ["な", "れ"]}]}, {"zh": "纵然苍蓝清风此刻叩击我的心门", "tokens": [{"text": "蒼い", "reading": "あおい", "romaji": "aoi", "gloss": "苍蓝的", "kanaChars": ["あ", "お", "い"]}, {"text": "風", "reading": "かぜ", "romaji": "kaze", "gloss": "风", "kanaChars": ["か", "ぜ"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "いま", "reading": "いま", "romaji": "ima", "gloss": "此刻", "kanaChars": ["い", "ま"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "胸", "reading": "むね", "romaji": "mune", "gloss": "胸口/心", "kanaChars": ["む", "ね"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ドア", "reading": "どあ", "romaji": "doa", "gloss": "门", "kanaChars": ["ど", "あ"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "叩いても", "reading": "たたいても", "romaji": "tataitemo", "gloss": "即便敲打", "kanaChars": ["た", "た", "い", "て", "も"]}]}, {"zh": "你却只凝视着我 向我展露笑颜", "tokens": [{"text": "私", "reading": "わたし", "romaji": "watashi", "gloss": "我", "kanaChars": ["わ", "た", "し"]}, {"text": "だけ", "reading": "だけ", "romaji": "dake", "gloss": "只是", "kanaChars": ["だ", "け"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "ただ", "reading": "ただ", "romaji": "tada", "gloss": "只是", "kanaChars": ["た", "だ"]}, {"text": "見つめて", "reading": "みつめて", "romaji": "mitsumete", "gloss": "凝视着", "kanaChars": ["み", "つ", "め", "て"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "微笑んでる", "reading": "ほほえんでる", "romaji": "hohoenderu", "gloss": "微笑着", "kanaChars": ["ほ", "ほ", "え", "ん", "で", "る"]}, {"text": "あなた", "reading": "あなた", "romaji": "anata", "gloss": "你", "kanaChars": ["あ", "な", "た"]}]}, {"zh": "为追寻那指尖悄然触碰的事物而沉醉", "tokens": [{"text": "そっと", "reading": "そっと", "romaji": "sotto", "gloss": "悄悄地", "kanaChars": ["そ", "と"]}, {"text": "ふれる", "reading": "ふれる", "romaji": "fureru", "gloss": "触碰", "kanaChars": ["ふ", "れ", "る"]}, {"text": "もの", "reading": "もの", "romaji": "mono", "gloss": "事物", "kanaChars": ["も", "の"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "もとめる", "reading": "もとめる", "romaji": "motomeru", "gloss": "追求", "kanaChars": ["も", "と", "め", "る"]}, {"text": "こと", "reading": "こと", "romaji": "koto", "gloss": "事情", "kanaChars": ["こ", "と"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（对象）", "kanaChars": ["に"]}, {"text": "夢中で", "reading": "むちゅうで", "romaji": "muchuu de", "gloss": "沉醉其中", "kanaChars": ["む", "ちゅ", "う", "で"]}]}, {"zh": "那双连命运都尚未知晓的稚嫩眼眸", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "さえ", "reading": "さえ", "romaji": "sae", "gloss": "连…都", "kanaChars": ["さ", "え"]}, {"text": "まだ", "reading": "まだ", "romaji": "mada", "gloss": "尚未", "kanaChars": ["ま", "だ"]}, {"text": "知らない", "reading": "しらない", "romaji": "shiranai", "gloss": "不知道", "kanaChars": ["し", "ら", "な", "い"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "いたいけな", "reading": "いたいけな", "romaji": "itaikena", "gloss": "稚嫩可怜的", "kanaChars": ["い", "た", "い", "け", "な"]}, {"text": "瞳", "reading": "ひとみ", "romaji": "hitomi", "gloss": "眼眸", "kanaChars": ["ひ", "と", "み"]}]}, {"zh": "但终有一日你会发觉 在你的背上", "tokens": [{"text": "だけど", "reading": "だけど", "romaji": "dakedo", "gloss": "但是", "kanaChars": ["だ", "け", "ど"]}, {"text": "いつか", "reading": "いつか", "romaji": "itsuka", "gloss": "总有一天", "kanaChars": ["い", "つ", "か"]}, {"text": "気付くでしょう", "reading": "きづくでしょう", "romaji": "kizuku deshou", "gloss": "会察觉到吧", "kanaChars": ["き", "づ", "く", "で", "しょ", "う"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "その", "reading": "その", "romaji": "sono", "gloss": "那个", "kanaChars": ["そ", "の"]}, {"text": "背中", "reading": "せなか", "romaji": "senaka", "gloss": "背后", "kanaChars": ["せ", "な", "か"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（方位）", "kanaChars": ["に"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}]}, {"zh": "生有为奔赴遥远未来而生的羽翼", "tokens": [{"text": "遥か", "reading": "はるか", "romaji": "haruka", "gloss": "遥远的", "kanaChars": ["は", "る", "か"]}, {"text": "未来", "reading": "みらい", "romaji": "mirai", "gloss": "未来", "kanaChars": ["み", "ら", "い"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "めざす", "reading": "めざす", "romaji": "mezasu", "gloss": "以…为目标", "kanaChars": ["め", "ざ", "す"]}, {"text": "ため", "reading": "ため", "romaji": "tame", "gloss": "为了", "kanaChars": ["た", "め"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "羽根", "reading": "はね", "romaji": "hane", "gloss": "羽翼", "kanaChars": ["は", "ね"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "ある", "reading": "ある", "romaji": "aru", "gloss": "有", "kanaChars": ["あ", "る"]}, {"text": "こと", "reading": "こと", "romaji": "koto", "gloss": "这件事", "kanaChars": ["こ", "と"]}]}, {"zh": "残酷天使的行动纲领", "tokens": [{"text": "残酷な", "reading": "ざんこくな", "romaji": "zankoku na", "gloss": "残酷的", "kanaChars": ["ざ", "ん", "こ", "く", "な"]}, {"text": "天使", "reading": "てんし", "romaji": "tenshi", "gloss": "天使", "kanaChars": ["て", "ん", "し"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "テーゼ", "reading": "てーぜ", "romaji": "teeze", "gloss": "命题/纲领", "kanaChars": ["て", "ぜ"]}]}, {"zh": "终将从窗边展翅翱翔", "tokens": [{"text": "窓辺", "reading": "まどべ", "romaji": "madobe", "gloss": "窗边", "kanaChars": ["ま", "ど", "べ"]}, {"text": "から", "reading": "から", "romaji": "kara", "gloss": "从", "kanaChars": ["か", "ら"]}, {"text": "やがて", "reading": "やがて", "romaji": "yagate", "gloss": "终将", "kanaChars": ["や", "が", "て"]}, {"text": "飛び立つ", "reading": "とびたつ", "romaji": "tobitatsu", "gloss": "展翅飞起", "kanaChars": ["と", "び", "た", "つ"]}]}, {"zh": "倘若以迸发滚烫的热忱 背弃过往回忆", "tokens": [{"text": "ほとばしる", "reading": "ほとばしる", "romaji": "hotobashiru", "gloss": "迸发/涌出", "kanaChars": ["ほ", "と", "ば", "し", "る"]}, {"text": "熱い", "reading": "あつい", "romaji": "atsui", "gloss": "炽热的", "kanaChars": ["あ", "つ", "い"]}, {"text": "パトス", "reading": "ぱとす", "romaji": "patosu", "gloss": "热情", "kanaChars": ["ぱ", "と", "す"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "以", "kanaChars": ["で"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "思い出", "reading": "おもいで", "romaji": "omoide", "gloss": "回忆", "kanaChars": ["お", "も", "い", "で"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "裏切る", "reading": "うらぎる", "romaji": "uragiru", "gloss": "背叛", "kanaChars": ["う", "ら", "ぎ", "る"]}, {"text": "なら", "reading": "なら", "romaji": "nara", "gloss": "如果…的话", "kanaChars": ["な", "ら"]}]}, {"zh": "就拥抱这片宇宙绽放光辉 少年啊 化作神话吧", "tokens": [{"text": "この", "reading": "この", "romaji": "kono", "gloss": "这个", "kanaChars": ["こ", "の"]}, {"text": "宇宙", "reading": "うちゅう", "romaji": "uchuu", "gloss": "宇宙", "kanaChars": ["う", "ちゅ", "う"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "抱いて", "reading": "だいて", "romaji": "daite", "gloss": "拥抱着", "kanaChars": ["だ", "い", "て"]}, {"text": "輝く", "reading": "かがやく", "romaji": "kagayaku", "gloss": "闪耀", "kanaChars": ["か", "が", "や", "く"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "少年", "reading": "しょうねん", "romaji": "shounen", "gloss": "少年", "kanaChars": ["しょ", "う", "ね", "ん"]}, {"text": "よ", "reading": "よ", "romaji": "yo", "gloss": "啊（呼唤）", "kanaChars": ["よ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "神話", "reading": "しんわ", "romaji": "shinwa", "gloss": "神话", "kanaChars": ["し", "ん", "わ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "变成…", "kanaChars": ["に"]}, {"text": "なれ", "reading": "なれ", "romaji": "nare", "gloss": "成为吧", "kanaChars": ["な", "れ"]}]}, {"zh": "沉睡已久的 属于我的爱的摇篮", "tokens": [{"text": "ずっと", "reading": "ずっと", "romaji": "zutto", "gloss": "一直", "kanaChars": ["ず", "と"]}, {"text": "眠ってる", "reading": "ねむってる", "romaji": "nemutteru", "gloss": "沉睡着", "kanaChars": ["ね", "む", "て", "る"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "私", "reading": "わたし", "romaji": "watashi", "gloss": "我", "kanaChars": ["わ", "た", "し"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "愛", "reading": "あい", "romaji": "ai", "gloss": "爱", "kanaChars": ["あ", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "揺りかご", "reading": "ゆりかご", "romaji": "yurikago", "gloss": "摇篮", "kanaChars": ["ゆ", "り", "か", "ご"]}]}, {"zh": "终会迎来唯独你被梦之使者唤醒的清晨", "tokens": [{"text": "あなた", "reading": "あなた", "romaji": "anata", "gloss": "你", "kanaChars": ["あ", "な", "た"]}, {"text": "だけ", "reading": "だけ", "romaji": "dake", "gloss": "只有", "kanaChars": ["だ", "け"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "夢", "reading": "ゆめ", "romaji": "yume", "gloss": "梦", "kanaChars": ["ゆ", "め"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "使者", "reading": "ししゃ", "romaji": "shisha", "gloss": "使者", "kanaChars": ["し", "しゃ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "被…", "kanaChars": ["に"]}, {"text": "呼ばれる", "reading": "よばれる", "romaji": "yobareru", "gloss": "被呼唤", "kanaChars": ["よ", "ば", "れ", "る"]}, {"text": "朝", "reading": "あさ", "romaji": "asa", "gloss": "早晨", "kanaChars": ["あ", "さ"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "来る", "reading": "くる", "romaji": "kuru", "gloss": "到来", "kanaChars": ["く", "る"]}]}, {"zh": "月光映照在你纤细的颈侧", "tokens": [{"text": "細い", "reading": "ほそい", "romaji": "hosoi", "gloss": "纤细的", "kanaChars": ["ほ", "そ", "い"]}, {"text": "首筋", "reading": "くびすじ", "romaji": "kubisuji", "gloss": "颈部", "kanaChars": ["く", "び", "す", "じ"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "月あかり", "reading": "つきあかり", "romaji": "tsukiakari", "gloss": "月光", "kanaChars": ["つ", "き", "あ", "か", "り"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "映してる", "reading": "うつしてる", "romaji": "utsushiteru", "gloss": "映照着", "kanaChars": ["う", "つ", "し", "て", "る"]}]}, {"zh": "多想将全世界的时间静止 将你封存于此", "tokens": [{"text": "世界中", "reading": "せかいじゅう", "romaji": "sekaijuu", "gloss": "全世界", "kanaChars": ["せ", "か", "い", "じゅ", "う"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "時", "reading": "とき", "romaji": "toki", "gloss": "时间", "kanaChars": ["と", "き"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "止めて", "reading": "とめて", "romaji": "tomete", "gloss": "使…停止", "kanaChars": ["と", "め", "て"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "閉じこめたい", "reading": "とじこめたい", "romaji": "tojikometai", "gloss": "想要封闭", "kanaChars": ["と", "じ", "こ", "め", "た", "い"]}, {"text": "けど", "reading": "けど", "romaji": "kedo", "gloss": "但是", "kanaChars": ["け", "ど"]}]}, {"zh": "倘若你我相遇本就存在意义", "tokens": [{"text": "もしも", "reading": "もしも", "romaji": "moshimo", "gloss": "如果", "kanaChars": ["も", "し", "も"]}, {"text": "ふたり", "reading": "ふたり", "romaji": "futari", "gloss": "两人", "kanaChars": ["ふ", "た", "り"]}, {"text": "逢えた", "reading": "あえた", "romaji": "aeta", "gloss": "曾相遇", "kanaChars": ["あ", "え", "た"]}, {"text": "こと", "reading": "こと", "romaji": "koto", "gloss": "这件事", "kanaChars": ["こ", "と"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（对象）", "kanaChars": ["に"]}, {"text": "意味", "reading": "いみ", "romaji": "imi", "gloss": "意义", "kanaChars": ["い", "み"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "ある", "reading": "ある", "romaji": "aru", "gloss": "有", "kanaChars": ["あ", "る"]}, {"text": "なら", "reading": "なら", "romaji": "nara", "gloss": "如果…的话", "kanaChars": ["な", "ら"]}]}, {"zh": "那我便是为让你知晓自由而存在的圣经", "tokens": [{"text": "私", "reading": "わたし", "romaji": "watashi", "gloss": "我", "kanaChars": ["わ", "た", "し"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "そう", "reading": "そう", "romaji": "sou", "gloss": "就是那样", "kanaChars": ["そ", "う"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "自由", "reading": "じゆう", "romaji": "jiyuu", "gloss": "自由", "kanaChars": ["じ", "ゆ", "う"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "知る", "reading": "しる", "romaji": "shiru", "gloss": "知晓", "kanaChars": ["し", "る"]}, {"text": "ため", "reading": "ため", "romaji": "tame", "gloss": "为了", "kanaChars": ["た", "め"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "バイブル", "reading": "ばいぶる", "romaji": "baiburu", "gloss": "圣经", "kanaChars": ["ば", "い", "ぶ", "る"]}]}, {"zh": "残酷天使的行动纲领", "tokens": [{"text": "残酷な", "reading": "ざんこくな", "romaji": "zankoku na", "gloss": "残酷的", "kanaChars": ["ざ", "ん", "こ", "く", "な"]}, {"text": "天使", "reading": "てんし", "romaji": "tenshi", "gloss": "天使", "kanaChars": ["て", "ん", "し"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "テーゼ", "reading": "てーぜ", "romaji": "teeze", "gloss": "命题/纲领", "kanaChars": ["て", "ぜ"]}]}, {"zh": "悲伤便由此拉开序幕", "tokens": [{"text": "悲しみ", "reading": "かなしみ", "romaji": "kanashimi", "gloss": "悲伤", "kanaChars": ["か", "な", "し", "み"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "そして", "reading": "そして", "romaji": "soshite", "gloss": "然后", "kanaChars": ["そ", "し", "て"]}, {"text": "はじまる", "reading": "はじまる", "romaji": "hajimaru", "gloss": "开始", "kanaChars": ["は", "じ", "ま", "る"]}]}, {"zh": "当紧拥的生命形态 从那场大梦之中苏醒", "tokens": [{"text": "抱きしめた", "reading": "だきしめた", "romaji": "dakishimeta", "gloss": "紧紧拥抱过的", "kanaChars": ["だ", "き", "し", "め", "た"]}, {"text": "命", "reading": "いのち", "romaji": "inochi", "gloss": "生命", "kanaChars": ["い", "の", "ち"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "かたち", "reading": "かたち", "romaji": "katachi", "gloss": "形态", "kanaChars": ["か", "た", "ち"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "その", "reading": "その", "romaji": "sono", "gloss": "那个", "kanaChars": ["そ", "の"]}, {"text": "夢", "reading": "ゆめ", "romaji": "yume", "gloss": "梦", "kanaChars": ["ゆ", "め"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（对象）", "kanaChars": ["に"]}, {"text": "目覚めた", "reading": "めざめた", "romaji": "mezameta", "gloss": "苏醒了", "kanaChars": ["め", "ざ", "め", "た"]}, {"text": "とき", "reading": "とき", "romaji": "toki", "gloss": "之时", "kanaChars": ["と", "き"]}]}, {"zh": "绽放出胜过一切的光芒 少年啊 化作神话吧", "tokens": [{"text": "誰よりも", "reading": "だれよりも", "romaji": "dare yori mo", "gloss": "比任何人都", "kanaChars": ["だ", "れ", "よ", "り", "も"]}, {"text": "光", "reading": "ひかり", "romaji": "hikari", "gloss": "光芒", "kanaChars": ["ひ", "か", "り"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "放つ", "reading": "はなつ", "romaji": "hanatsu", "gloss": "释放/绽放", "kanaChars": ["は", "な", "つ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "少年", "reading": "しょうねん", "romaji": "shounen", "gloss": "少年", "kanaChars": ["しょ", "う", "ね", "ん"]}, {"text": "よ", "reading": "よ", "romaji": "yo", "gloss": "啊（呼唤）", "kanaChars": ["よ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "神話", "reading": "しんわ", "romaji": "shinwa", "gloss": "神话", "kanaChars": ["し", "ん", "わ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "变成…", "kanaChars": ["に"]}, {"text": "なれ", "reading": "なれ", "romaji": "nare", "gloss": "成为吧", "kanaChars": ["な", "れ"]}]}, {"zh": "人类一边编织爱意 一边书写历史", "tokens": [{"text": "人", "reading": "ひと", "romaji": "hito", "gloss": "人", "kanaChars": ["ひ", "と"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "愛", "reading": "あい", "romaji": "ai", "gloss": "爱", "kanaChars": ["あ", "い"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "つむぎながら", "reading": "つむぎながら", "romaji": "tsumugi nagara", "gloss": "一边编织", "kanaChars": ["つ", "む", "ぎ", "な", "が", "ら"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "歴史", "reading": "れきし", "romaji": "rekishi", "gloss": "历史", "kanaChars": ["れ", "き", "し"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "つくる", "reading": "つくる", "romaji": "tsukuru", "gloss": "创造/书写", "kanaChars": ["つ", "く", "る"]}]}, {"zh": "无法成为女神的我 依旧继续生存", "tokens": [{"text": "女神", "reading": "めがみ", "romaji": "megami", "gloss": "女神", "kanaChars": ["め", "が", "み"]}, {"text": "なんて", "reading": "なんて", "romaji": "nante", "gloss": "之类的", "kanaChars": ["な", "ん", "て"]}, {"text": "なれない", "reading": "なれない", "romaji": "narenai", "gloss": "无法成为", "kanaChars": ["な", "れ", "な", "い"]}, {"text": "まま", "reading": "まま", "romaji": "mama", "gloss": "保持…状态", "kanaChars": ["ま", "ま"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "私", "reading": "わたし", "romaji": "watashi", "gloss": "我", "kanaChars": ["わ", "た", "し"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "生きる", "reading": "いきる", "romaji": "ikiru", "gloss": "生存/活着", "kanaChars": ["い", "き", "る"]}]}, {"zh": "残酷天使的行动纲领", "tokens": [{"text": "残酷な", "reading": "ざんこくな", "romaji": "zankoku na", "gloss": "残酷的", "kanaChars": ["ざ", "ん", "こ", "く", "な"]}, {"text": "天使", "reading": "てんし", "romaji": "tenshi", "gloss": "天使", "kanaChars": ["て", "ん", "し"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "テーゼ", "reading": "てーぜ", "romaji": "teeze", "gloss": "命题/纲领", "kanaChars": ["て", "ぜ"]}]}, {"zh": "终将从窗边展翅翱翔", "tokens": [{"text": "窓辺", "reading": "まどべ", "romaji": "madobe", "gloss": "窗边", "kanaChars": ["ま", "ど", "べ"]}, {"text": "から", "reading": "から", "romaji": "kara", "gloss": "从", "kanaChars": ["か", "ら"]}, {"text": "やがて", "reading": "やがて", "romaji": "yagate", "gloss": "终将", "kanaChars": ["や", "が", "て"]}, {"text": "飛び立つ", "reading": "とびたつ", "romaji": "tobitatsu", "gloss": "展翅飞起", "kanaChars": ["と", "び", "た", "つ"]}]}, {"zh": "倘若以迸发滚烫的热忱 背弃过往回忆", "tokens": [{"text": "ほとばしる", "reading": "ほとばしる", "romaji": "hotobashiru", "gloss": "迸发/涌出", "kanaChars": ["ほ", "と", "ば", "し", "る"]}, {"text": "熱い", "reading": "あつい", "romaji": "atsui", "gloss": "炽热的", "kanaChars": ["あ", "つ", "い"]}, {"text": "パトス", "reading": "ぱとす", "romaji": "patosu", "gloss": "热情", "kanaChars": ["ぱ", "と", "す"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "以", "kanaChars": ["で"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "思い出", "reading": "おもいで", "romaji": "omoide", "gloss": "回忆", "kanaChars": ["お", "も", "い", "で"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "裏切る", "reading": "うらぎる", "romaji": "uragiru", "gloss": "背叛", "kanaChars": ["う", "ら", "ぎ", "る"]}, {"text": "なら", "reading": "なら", "romaji": "nara", "gloss": "如果…的话", "kanaChars": ["な", "ら"]}]}, {"zh": "就拥抱这片宇宙绽放光辉 少年啊 化作神话吧", "tokens": [{"text": "この", "reading": "この", "romaji": "kono", "gloss": "这个", "kanaChars": ["こ", "の"]}, {"text": "宇宙", "reading": "うちゅう", "romaji": "uchuu", "gloss": "宇宙", "kanaChars": ["う", "ちゅ", "う"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "抱いて", "reading": "だいて", "romaji": "daite", "gloss": "拥抱着", "kanaChars": ["だ", "い", "て"]}, {"text": "輝く", "reading": "かがやく", "romaji": "kagayaku", "gloss": "闪耀", "kanaChars": ["か", "が", "や", "く"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "少年", "reading": "しょうねん", "romaji": "shounen", "gloss": "少年", "kanaChars": ["しょ", "う", "ね", "ん"]}, {"text": "よ", "reading": "よ", "romaji": "yo", "gloss": "啊（呼唤）", "kanaChars": ["よ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "神話", "reading": "しんわ", "romaji": "shinwa", "gloss": "神话", "kanaChars": ["し", "ん", "わ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "变成…", "kanaChars": ["に"]}, {"text": "なれ", "reading": "なれ", "romaji": "nare", "gloss": "成为吧", "kanaChars": ["な", "れ"]}]}]}, {"id": "zard", "title": "運命のルーレット廻して", "artist": "ZARD", "lines": [{"zh": "转动命运之轮", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ルーレット", "reading": "るーれっと", "romaji": "ruuretto", "gloss": "轮盘", "kanaChars": ["る", "れ", "と"]}, {"text": "廻して", "reading": "まわして", "romaji": "mawashite", "gloss": "转动", "kanaChars": ["ま", "わ", "し", "て"]}]}, {"zh": "命运之轮不停旋转", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ルーレット", "reading": "るーれっと", "romaji": "ruuretto", "gloss": "轮盘", "kanaChars": ["る", "れ", "と"]}, {"text": "廻して", "reading": "まわして", "romaji": "mawashite", "gloss": "转动", "kanaChars": ["ま", "わ", "し", "て"]}]}, {"zh": "我的目光始终追随着你", "tokens": [{"text": "ずっと", "reading": "ずっと", "romaji": "zutto", "gloss": "一直", "kanaChars": ["ず", "と"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "見ていた", "reading": "みていた", "romaji": "miteita", "gloss": "一直注视着", "kanaChars": ["み", "て", "い", "た"]}]}, {"zh": "明明如此幸福 可为何", "tokens": [{"text": "何故なの", "reading": "なぜなの", "romaji": "naze nano", "gloss": "为什么呢", "kanaChars": ["な", "ぜ", "な", "の"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "こんなに", "reading": "こんなに", "romaji": "konnani", "gloss": "如此", "kanaChars": ["こ", "ん", "な", "に"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "幸せなのに", "reading": "しあわせなのに", "romaji": "shiawase nanoni", "gloss": "明明很幸福", "kanaChars": ["し", "あ", "わ", "せ", "な", "の", "に"]}]}, {"zh": "望见地平线 心中却泛起哀伤", "tokens": [{"text": "水平線", "reading": "すいへいせん", "romaji": "suiheisen", "gloss": "水平线", "kanaChars": ["す", "い", "へ", "い", "せ", "ん"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "見ると", "reading": "みると", "romaji": "miru to", "gloss": "一看…就", "kanaChars": ["み", "る", "と"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "哀しくなる", "reading": "かなしくなる", "romaji": "kanashiku naru", "gloss": "变得悲伤", "kanaChars": ["か", "な", "し", "く", "な", "る"]}]}, {"zh": "仿佛远远眺望着曾经的自己", "tokens": [{"text": "あの頃", "reading": "あのころ", "romaji": "ano koro", "gloss": "那时候", "kanaChars": ["あ", "の", "こ", "ろ"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "自分", "reading": "じぶん", "romaji": "jibun", "gloss": "自己", "kanaChars": ["じ", "ぶ", "ん"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "遠くで", "reading": "とおくで", "romaji": "tooku de", "gloss": "在远处", "kanaChars": ["と", "お", "く", "で"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "見ている", "reading": "みている", "romaji": "miteiru", "gloss": "注视着", "kanaChars": ["み", "て", "い", "る"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "そんな", "reading": "そんな", "romaji": "sonna", "gloss": "那样的", "kanaChars": ["そ", "ん", "な"]}, {"text": "感じ", "reading": "かんじ", "romaji": "kanji", "gloss": "感觉", "kanaChars": ["か", "ん", "じ"]}]}, {"zh": "命运之轮不停旋转", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ルーレット", "reading": "るーれっと", "romaji": "ruuretto", "gloss": "轮盘", "kanaChars": ["る", "れ", "と"]}, {"text": "廻して", "reading": "まわして", "romaji": "mawashite", "gloss": "转动", "kanaChars": ["ま", "わ", "し", "て"]}]}, {"zh": "万般思索尽数化为谜团", "tokens": [{"text": "アレコレ", "reading": "あれこれ", "romaji": "arekore", "gloss": "种种", "kanaChars": ["あ", "れ", "こ", "れ"]}, {"text": "深く", "reading": "ふかく", "romaji": "fukaku", "gloss": "深深地", "kanaChars": ["ふ", "か", "く"]}, {"text": "考える", "reading": "かんがえる", "romaji": "kangaeru", "gloss": "思考", "kanaChars": ["か", "ん", "が", "え", "る"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "（形式名词）", "kanaChars": ["の"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "Mystery", "reading": "Mystery", "romaji": "Mystery", "gloss": "谜团", "kanaChars": []}]}, {"zh": "看吧 命中注定之人就在那里", "tokens": [{"text": "ほら", "reading": "ほら", "romaji": "hora", "gloss": "看吧", "kanaChars": ["ほ", "ら"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "運命の人", "reading": "うんめいのひと", "romaji": "unmei no hito", "gloss": "命中注定之人", "kanaChars": ["う", "ん", "め", "い", "の", "ひ", "と"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "そこ", "reading": "そこ", "romaji": "soko", "gloss": "那里", "kanaChars": ["そ", "こ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（场所）", "kanaChars": ["に"]}, {"text": "いる", "reading": "いる", "romaji": "iru", "gloss": "在", "kanaChars": ["い", "る"]}]}, {"zh": "我的目光始终追随着你", "tokens": [{"text": "ずっと", "reading": "ずっと", "romaji": "zutto", "gloss": "一直", "kanaChars": ["ず", "と"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "見ていた", "reading": "みていた", "romaji": "miteita", "gloss": "一直注视着", "kanaChars": ["み", "て", "い", "た"]}]}, {"zh": "仰望漫天星空 仅凭一抹笑颜", "tokens": [{"text": "星空", "reading": "ほしぞら", "romaji": "hoshizora", "gloss": "星空", "kanaChars": ["ほ", "し", "ぞ", "ら"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "見上げて", "reading": "みあげて", "romaji": "miagete", "gloss": "仰望着", "kanaChars": ["み", "あ", "げ", "て"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "笑顔", "reading": "えがお", "romaji": "egao", "gloss": "笑颜", "kanaChars": ["え", "が", "お"]}, {"text": "ひとつ", "reading": "ひとつ", "romaji": "hitotsu", "gloss": "一个", "kanaChars": ["ひ", "と", "つ"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "以", "kanaChars": ["で"]}]}, {"zh": "仿佛就能从此处纵身飞向天际", "tokens": [{"text": "この", "reading": "この", "romaji": "kono", "gloss": "这个", "kanaChars": ["こ", "の"]}, {"text": "高い", "reading": "たかい", "romaji": "takai", "gloss": "高的", "kanaChars": ["た", "か", "い"]}, {"text": "所", "reading": "ところ", "romaji": "tokoro", "gloss": "地方", "kanaChars": ["と", "こ", "ろ"]}, {"text": "から", "reading": "から", "romaji": "kara", "gloss": "从", "kanaChars": ["か", "ら"]}, {"text": "でも", "reading": "でも", "romaji": "demo", "gloss": "即便也", "kanaChars": ["で", "も"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "飛べそう", "reading": "とべそう", "romaji": "tobesou", "gloss": "好像能飞起来", "kanaChars": ["と", "べ", "そ", "う"]}, {"text": "じゃん", "reading": "じゃん", "romaji": "jan", "gloss": "不是吗", "kanaChars": ["じゃ", "ん"]}]}, {"zh": "加快速度 透过望远镜眺望", "tokens": [{"text": "スピード", "reading": "すぴーど", "romaji": "supiido", "gloss": "速度", "kanaChars": ["す", "ぴ", "ど"]}, {"text": "上げ", "reading": "あげ", "romaji": "age", "gloss": "提高", "kanaChars": ["あ", "げ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "望遠鏡", "reading": "ぼうえんきょう", "romaji": "bouenkyou", "gloss": "望远镜", "kanaChars": ["ぼ", "う", "え", "ん", "きょ", "う"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "覗いたら", "reading": "のぞいたら", "romaji": "nozoitara", "gloss": "一窥探…就", "kanaChars": ["の", "ぞ", "い", "た", "ら"]}]}, {"zh": "就能够窥见未来光景", "tokens": [{"text": "未来", "reading": "みらい", "romaji": "mirai", "gloss": "未来", "kanaChars": ["み", "ら", "い"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "見える", "reading": "みえる", "romaji": "mieru", "gloss": "能看见", "kanaChars": ["み", "え", "る"]}, {"text": "よ", "reading": "よ", "romaji": "yo", "gloss": "啊", "kanaChars": ["よ"]}]}, {"zh": "命运之轮不停旋转", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ルーレット", "reading": "るーれっと", "romaji": "ruuretto", "gloss": "轮盘", "kanaChars": ["る", "れ", "と"]}, {"text": "廻して", "reading": "まわして", "romaji": "mawashite", "gloss": "转动", "kanaChars": ["ま", "わ", "し", "て"]}]}, {"zh": "去往何处 才能与回忆重逢", "tokens": [{"text": "何処", "reading": "どこ", "romaji": "doko", "gloss": "哪里", "kanaChars": ["ど", "こ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（方向）", "kanaChars": ["に"]}, {"text": "行けば", "reading": "いけば", "romaji": "ikeba", "gloss": "如果去…", "kanaChars": ["い", "け", "ば"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "想い出", "reading": "おもいで", "romaji": "omoide", "gloss": "回忆", "kanaChars": ["お", "も", "い", "で"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（对象）", "kanaChars": ["に"]}, {"text": "会える", "reading": "あえる", "romaji": "aeru", "gloss": "能相遇", "kanaChars": ["あ", "え", "る"]}]}, {"zh": "蔚蓝星球之上渺小的你我二人", "tokens": [{"text": "青い", "reading": "あおい", "romaji": "aoi", "gloss": "蓝色的", "kanaChars": ["あ", "お", "い"]}, {"text": "地球", "reading": "ちきゅう", "romaji": "chikyuu", "gloss": "地球", "kanaChars": ["ち", "きゅ", "う"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "ちっぽけな", "reading": "ちっぽけな", "romaji": "chippokena", "gloss": "渺小的", "kanaChars": ["ち", "ぽ", "け", "な"]}, {"text": "二人", "reading": "ふたり", "romaji": "futari", "gloss": "两人", "kanaChars": ["ふ", "た", "り"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}]}, {"zh": "时至今日仍在不断蜕变前行", "tokens": [{"text": "今", "reading": "いま", "romaji": "ima", "gloss": "现在", "kanaChars": ["い", "ま"]}, {"text": "も", "reading": "も", "romaji": "mo", "gloss": "也", "kanaChars": ["も"]}, {"text": "進化し続ける", "reading": "しんかしつづける", "romaji": "shinka shitsuzukeru", "gloss": "持续进化", "kanaChars": ["し", "ん", "か", "し", "つ", "づ", "け", "る"]}]}, {"zh": "命运之轮不停旋转", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ルーレット", "reading": "るーれっと", "romaji": "ruuretto", "gloss": "轮盘", "kanaChars": ["る", "れ", "と"]}, {"text": "廻して", "reading": "まわして", "romaji": "mawashite", "gloss": "转动", "kanaChars": ["ま", "わ", "し", "て"]}]}, {"zh": "伸手向着过往追寻", "tokens": [{"text": "過去", "reading": "かこ", "romaji": "kako", "gloss": "过去", "kanaChars": ["か", "こ"]}, {"text": "へ", "reading": "へ", "romaji": "e", "gloss": "朝向", "kanaChars": ["へ"]}, {"text": "と", "reading": "と", "romaji": "to", "gloss": "（强调）", "kanaChars": ["と"]}, {"text": "手", "reading": "て", "romaji": "te", "gloss": "手", "kanaChars": ["て"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "伸ばせ", "reading": "のばせ", "romaji": "nobase", "gloss": "伸出吧", "kanaChars": ["の", "ば", "せ"]}]}, {"zh": "看吧 无论何时幸福都在前方等候", "tokens": [{"text": "ほら", "reading": "ほら", "romaji": "hora", "gloss": "看吧", "kanaChars": ["ほ", "ら"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "どんな", "reading": "どんな", "romaji": "donna", "gloss": "无论怎样的", "kanaChars": ["ど", "ん", "な"]}, {"text": "時", "reading": "とき", "romaji": "toki", "gloss": "时候", "kanaChars": ["と", "き"]}, {"text": "も", "reading": "も", "romaji": "mo", "gloss": "也/都", "kanaChars": ["も"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "幸せ", "reading": "しあわせ", "romaji": "shiawase", "gloss": "幸福", "kanaChars": ["し", "あ", "わ", "せ"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "待ってる", "reading": "まってる", "romaji": "matteru", "gloss": "等待着", "kanaChars": ["ま", "て", "る"]}, {"text": "ところ", "reading": "ところ", "romaji": "tokoro", "gloss": "之处", "kanaChars": ["と", "こ", "ろ"]}]}, {"zh": "命运之轮不停旋转", "tokens": [{"text": "運命", "reading": "うんめい", "romaji": "unmei", "gloss": "命运", "kanaChars": ["う", "ん", "め", "い"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "ルーレット", "reading": "るーれっと", "romaji": "ruuretto", "gloss": "轮盘", "kanaChars": ["る", "れ", "と"]}, {"text": "廻して", "reading": "まわして", "romaji": "mawashite", "gloss": "转动", "kanaChars": ["ま", "わ", "し", "て"]}]}, {"zh": "我的目光始终追随着你", "tokens": [{"text": "ずっと", "reading": "ずっと", "romaji": "zutto", "gloss": "一直", "kanaChars": ["ず", "と"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "見ていた", "reading": "みていた", "romaji": "miteita", "gloss": "一直注视着", "kanaChars": ["み", "て", "い", "た"]}]}]}, {"id": "time", "title": "Time after time ～花舞う街で～", "artist": "倉木麻衣", "lines": [{"zh": "落花纷飞的街道上", "tokens": [{"text": "Time after time", "reading": "Time after time", "romaji": "Time after time", "gloss": "一次又一次", "kanaChars": []}, {"text": " ～", "reading": " ～", "romaji": " ～", "gloss": "", "kanaChars": []}, {"text": "花舞う", "reading": "はなまう", "romaji": "hanamau", "gloss": "落花纷飞", "kanaChars": ["は", "な", "ま", "う"]}, {"text": "街", "reading": "まち", "romaji": "machi", "gloss": "街道", "kanaChars": ["ま", "ち"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "在", "kanaChars": ["で"]}, {"text": "～", "reading": "～", "romaji": "～", "gloss": "", "kanaChars": []}]}, {"zh": "倘若还能与你再度相遇", "tokens": [{"text": "もしも", "reading": "もしも", "romaji": "moshimo", "gloss": "如果", "kanaChars": ["も", "し", "も"]}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（对象）", "kanaChars": ["に"]}, {"text": "巡り逢えたら", "reading": "めぐりあえたら", "romaji": "meguriaetara", "gloss": "如果能重逢的话", "kanaChars": ["め", "ぐ", "り", "あ", "え", "た", "ら"]}]}, {"zh": "我绝不会再放开你的手", "tokens": [{"text": "二度と", "reading": "にどと", "romaji": "nidoto", "gloss": "再也（不）…", "kanaChars": ["に", "ど", "と"]}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "手", "reading": "て", "romaji": "te", "gloss": "手", "kanaChars": ["て"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "離さない", "reading": "はなさない", "romaji": "hanasanai", "gloss": "不会放开", "kanaChars": ["は", "な", "さ", "な", "い"]}]}, {"zh": "宣告春日落幕的花御堂", "tokens": [{"text": "春", "reading": "はる", "romaji": "haru", "gloss": "春天", "kanaChars": ["は", "る"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "終わり", "reading": "おわり", "romaji": "owari", "gloss": "结束", "kanaChars": ["お", "わ", "り"]}, {"text": "告げる", "reading": "つげる", "romaji": "tsugeru", "gloss": "宣告", "kanaChars": ["つ", "げ", "る"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "花御堂", "reading": "はなみどう", "romaji": "hanamidou", "gloss": "花御堂", "kanaChars": ["は", "な", "み", "ど", "う"]}]}, {"zh": "朦胧花瓣 零落一瓣", "tokens": [{"text": "霞む", "reading": "かすむ", "romaji": "kasumu", "gloss": "朦胧", "kanaChars": ["か", "す", "む"]}, {"text": "花", "reading": "はな", "romaji": "hana", "gloss": "花", "kanaChars": ["は", "な"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "一枚", "reading": "いちまい", "romaji": "ichimai", "gloss": "一片", "kanaChars": ["い", "ち", "ま", "い"]}]}, {"zh": "回忆的歌谣缓缓苏醒", "tokens": [{"text": "蘇る", "reading": "よみがえる", "romaji": "yomigaeru", "gloss": "苏醒", "kanaChars": ["よ", "み", "が", "え", "る"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "思い出", "reading": "おもいで", "romaji": "omoide", "gloss": "回忆", "kanaChars": ["お", "も", "い", "で"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "歌", "reading": "うた", "romaji": "uta", "gloss": "歌", "kanaChars": ["う", "た"]}]}, {"zh": "至今仍在心底温柔回荡", "tokens": [{"text": "この", "reading": "この", "romaji": "kono", "gloss": "这个", "kanaChars": ["こ", "の"]}, {"text": "胸", "reading": "むね", "romaji": "mune", "gloss": "胸口", "kanaChars": ["む", "ね"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（方位）", "kanaChars": ["に"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "今", "reading": "いま", "romaji": "ima", "gloss": "现在", "kanaChars": ["い", "ま"]}, {"text": "も", "reading": "も", "romaji": "mo", "gloss": "也", "kanaChars": ["も"]}, {"text": "優しく", "reading": "やさしく", "romaji": "yasashiku", "gloss": "温柔地", "kanaChars": ["や", "さ", "し", "く"]}]}, {"zh": "一次又一次", "tokens": [{"text": "Time after time", "reading": "Time after time", "romaji": "Time after time", "gloss": "一次又一次", "kanaChars": []}]}, {"zh": "与你邂逅的那份奇迹", "tokens": [{"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "と", "reading": "と", "romaji": "to", "gloss": "和", "kanaChars": ["と"]}, {"text": "出逢った", "reading": "であった", "romaji": "deatta", "gloss": "邂逅了", "kanaChars": ["で", "あ", "た"]}, {"text": "奇跡", "reading": "きせき", "romaji": "kiseki", "gloss": "奇迹", "kanaChars": ["き", "せ", "き"]}]}, {"zh": "在微风徐徐吹拂的街巷", "tokens": [{"text": "緩やかな", "reading": "ゆるやかな", "romaji": "yuruyakana", "gloss": "缓和的", "kanaChars": ["ゆ", "る", "や", "か", "な"]}, {"text": "風", "reading": "かぜ", "romaji": "kaze", "gloss": "风", "kanaChars": ["か", "ぜ"]}, {"text": "吹く", "reading": "ふく", "romaji": "fuku", "gloss": "吹", "kanaChars": ["ふ", "く"]}, {"text": "街", "reading": "まち", "romaji": "machi", "gloss": "街道", "kanaChars": ["ま", "ち"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "在", "kanaChars": ["で"]}]}, {"zh": "曾经悄悄牵手漫步的坡道", "tokens": [{"text": "そっと", "reading": "そっと", "romaji": "sotto", "gloss": "悄悄地", "kanaChars": ["そ", "と"]}, {"text": "手", "reading": "て", "romaji": "te", "gloss": "手", "kanaChars": ["て"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "繋ぎ", "reading": "つなぎ", "romaji": "tsunagi", "gloss": "牵起", "kanaChars": ["つ", "な", "ぎ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "歩いた", "reading": "あるいた", "romaji": "aruita", "gloss": "走过的", "kanaChars": ["あ", "る", "い", "た"]}, {"text": "坂道", "reading": "さかみち", "romaji": "sakamichi", "gloss": "坡道", "kanaChars": ["さ", "か", "み", "ち"]}]}, {"zh": "是至今无法忘怀的约定", "tokens": [{"text": "今", "reading": "いま", "romaji": "ima", "gloss": "现在", "kanaChars": ["い", "ま"]}, {"text": "も", "reading": "も", "romaji": "mo", "gloss": "也", "kanaChars": ["も"]}, {"text": "忘れない", "reading": "わすれない", "romaji": "wasurenai", "gloss": "不会忘记", "kanaChars": ["わ", "す", "れ", "な", "い"]}, {"text": "約束", "reading": "やくそく", "romaji": "yakusoku", "gloss": "约定", "kanaChars": ["や", "く", "そ", "く"]}]}, {"zh": "风中依稀传来你的声音", "tokens": [{"text": "風", "reading": "かぜ", "romaji": "kaze", "gloss": "风", "kanaChars": ["か", "ぜ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（场所）", "kanaChars": ["に"]}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}, {"text": "声", "reading": "こえ", "romaji": "koe", "gloss": "声音", "kanaChars": ["こ", "え"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "聞こえる", "reading": "きこえる", "romaji": "kikoeru", "gloss": "能听见", "kanaChars": ["き", "こ", "え", "る"]}]}, {"zh": "如薄冰澄澈的遥远记忆", "tokens": [{"text": "薄氷", "reading": "うすごおり", "romaji": "usugoori", "gloss": "薄冰", "kanaChars": ["う", "す", "ご", "お", "り"]}, {"text": "冴返る", "reading": "さえかえる", "romaji": "saekaeru", "gloss": "澄澈清冷", "kanaChars": ["さ", "え", "か", "え", "る"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "遠い", "reading": "とおい", "romaji": "tooi", "gloss": "遥远的", "kanaChars": ["と", "お", "い"]}, {"text": "記憶", "reading": "きおく", "romaji": "kioku", "gloss": "记忆", "kanaChars": ["き", "お", "く"]}]}, {"zh": "无惧伤痛 许下的誓言", "tokens": [{"text": "傷付く", "reading": "きずつく", "romaji": "kizutsuku", "gloss": "受伤", "kanaChars": ["き", "ず", "つ", "く"]}, {"text": "怖さ", "reading": "こわさ", "romaji": "kowasa", "gloss": "恐惧", "kanaChars": ["こ", "わ", "さ"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "知らず", "reading": "しらず", "romaji": "shirazu", "gloss": "不知道", "kanaChars": ["し", "ら", "ず"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "誓った", "reading": "ちかった", "romaji": "chikatta", "gloss": "曾发誓", "kanaChars": ["ち", "か", "た"]}]}, {"zh": "盼某日能重返此地", "tokens": [{"text": "いつか", "reading": "いつか", "romaji": "itsuka", "gloss": "总有一天", "kanaChars": ["い", "つ", "か"]}, {"text": "また", "reading": "また", "romaji": "mata", "gloss": "再次", "kanaChars": ["ま", "た"]}, {"text": "この", "reading": "この", "romaji": "kono", "gloss": "这个", "kanaChars": ["こ", "の"]}, {"text": "場所", "reading": "ばしょ", "romaji": "basho", "gloss": "地方", "kanaChars": ["ば", "しょ"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "在", "kanaChars": ["で"]}]}, {"zh": "在淡绯色的时节到来之时", "tokens": [{"text": "巡り逢おう", "reading": "めぐりあおう", "romaji": "meguriaou", "gloss": "让我们再相逢吧", "kanaChars": ["め", "ぐ", "り", "あ", "お", "う"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "薄紅色", "reading": "うすべにいろ", "romaji": "usubeniiro", "gloss": "淡绯色", "kanaChars": ["う", "す", "べ", "に", "い", "ろ"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}]}, {"zh": "带着笑容 再次相逢吧", "tokens": [{"text": "季節", "reading": "きせつ", "romaji": "kisetsu", "gloss": "季节", "kanaChars": ["き", "せ", "つ"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": "来る", "reading": "くる", "romaji": "kuru", "gloss": "到来", "kanaChars": ["く", "る"]}, {"text": "日", "reading": "ひ", "romaji": "hi", "gloss": "日子", "kanaChars": ["ひ"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（时间）", "kanaChars": ["に"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "笑顔", "reading": "えがお", "romaji": "egao", "gloss": "笑容", "kanaChars": ["え", "が", "お"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "以", "kanaChars": ["で"]}]}, {"zh": "一次又一次", "tokens": [{"text": "Time after time", "reading": "Time after time", "romaji": "Time after time", "gloss": "一次又一次", "kanaChars": []}]}, {"zh": "独自走在落花纷飞的街道", "tokens": [{"text": "ひとり", "reading": "ひとり", "romaji": "hitori", "gloss": "独自一人", "kanaChars": ["ひ", "と", "り"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "花舞う", "reading": "はなまう", "romaji": "hanamau", "gloss": "花瓣飞舞", "kanaChars": ["は", "な", "ま", "う"]}, {"text": "街", "reading": "まち", "romaji": "machi", "gloss": "街道", "kanaChars": ["ま", "ち"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "在", "kanaChars": ["で"]}]}, {"zh": "纵使繁花散落时光不复返", "tokens": [{"text": "散らざる", "reading": "ちらざる", "romaji": "chirazaru", "gloss": "不凋落的", "kanaChars": ["ち", "ら", "ざ", "る"]}, {"text": "とき", "reading": "とき", "romaji": "toki", "gloss": "时候", "kanaChars": ["と", "き"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "戻らない", "reading": "もどらない", "romaji": "modoranai", "gloss": "不会回来", "kanaChars": ["も", "ど", "ら", "な", "い"]}, {"text": "けれど", "reading": "けれど", "romaji": "keredo", "gloss": "虽然", "kanaChars": ["け", "れ", "ど"]}]}, {"zh": "面对一如那日未曾改变的风景", "tokens": [{"text": "あの日", "reading": "あのひ", "romaji": "anohi", "gloss": "那一天", "kanaChars": ["あ", "の", "ひ"]}, {"text": "と", "reading": "と", "romaji": "to", "gloss": "和", "kanaChars": ["と"]}, {"text": "同じ", "reading": "おなじ", "romaji": "onaji", "gloss": "相同", "kanaChars": ["お", "な", "じ"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "変わらない", "reading": "かわらない", "romaji": "kawaranai", "gloss": "不变的", "kanaChars": ["か", "わ", "ら", "な", "い"]}, {"text": "景色", "reading": "けしき", "romaji": "keshiki", "gloss": "风景", "kanaChars": ["け", "し", "き"]}, {"text": "に", "reading": "に", "romaji": "ni", "gloss": "（方位）", "kanaChars": ["に"]}]}, {"zh": "我含泪 静静在此守候", "tokens": [{"text": "涙", "reading": "なみだ", "romaji": "namida", "gloss": "眼泪", "kanaChars": ["な", "み", "だ"]}, {"text": "ひらり", "reading": "ひらり", "romaji": "hirari", "gloss": "轻轻飘落貌", "kanaChars": ["ひ", "ら", "り"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "待っていた", "reading": "まっていた", "romaji": "matteita", "gloss": "一直在等待", "kanaChars": ["ま", "て", "い", "た"]}, {"text": "よ", "reading": "よ", "romaji": "yo", "gloss": "啊", "kanaChars": ["よ"]}]}, {"zh": "如同纷飞花瓣轻抚水面一般", "tokens": [{"text": "風舞う", "reading": "かぜまう", "romaji": "kazemau", "gloss": "随风飞舞", "kanaChars": ["か", "ぜ", "ま", "う"]}, {"text": "花びら", "reading": "はなびら", "romaji": "hanabira", "gloss": "花瓣", "kanaChars": ["は", "な", "び", "ら"]}, {"text": "が", "reading": "が", "romaji": "ga", "gloss": "（主语）", "kanaChars": ["が"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "水面", "reading": "みなも", "romaji": "minamo", "gloss": "水面", "kanaChars": ["み", "な", "も"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}, {"text": "撫でる", "reading": "なでる", "romaji": "naderu", "gloss": "轻抚", "kanaChars": ["な", "で", "る"]}, {"text": "ように", "reading": "ように", "romaji": "you ni", "gloss": "像…一样", "kanaChars": ["よ", "う", "に"]}]}, {"zh": "越是珍视 心底便越是难过", "tokens": [{"text": "大切に", "reading": "たいせつに", "romaji": "taisetsu ni", "gloss": "珍重地", "kanaChars": ["た", "い", "せ", "つ", "に"]}, {"text": "想う", "reading": "おもう", "romaji": "omou", "gloss": "思念", "kanaChars": ["お", "も", "う"]}, {"text": "ほど", "reading": "ほど", "romaji": "hodo", "gloss": "越…越", "kanaChars": ["ほ", "ど"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "切なく", "reading": "せつなく", "romaji": "setsunaku", "gloss": "难过地", "kanaChars": ["せ", "つ", "な", "く"]}]}, {"zh": "虽说世人皆生来孤独", "tokens": [{"text": "人", "reading": "ひと", "romaji": "hito", "gloss": "人", "kanaChars": ["ひ", "と"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "皆", "reading": "みんな", "romaji": "minna", "gloss": "大家", "kanaChars": ["み", "ん", "な"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "孤独", "reading": "こどく", "romaji": "kodoku", "gloss": "孤独", "kanaChars": ["こ", "ど", "く"]}, {"text": "と", "reading": "と", "romaji": "to", "gloss": "（引用）", "kanaChars": ["と"]}, {"text": "言う", "reading": "いう", "romaji": "iu", "gloss": "说", "kanaChars": ["い", "う"]}, {"text": "けれど", "reading": "けれど", "romaji": "keredo", "gloss": "虽然", "kanaChars": ["け", "れ", "ど"]}]}, {"zh": "却还是忍不住去寻觅某个人", "tokens": [{"text": "探さずにはいられない", "reading": "さがさずにはいられない", "romaji": "sagasazuniwairarenai", "gloss": "忍不住想去寻找", "kanaChars": ["さ", "が", "さ", "ず", "に", "は", "い", "ら", "れ", "な", "い"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "誰か", "reading": "だれか", "romaji": "dareka", "gloss": "某个人", "kanaChars": ["だ", "れ", "か"]}, {"text": "を", "reading": "を", "romaji": "wo", "gloss": "（宾语）", "kanaChars": ["を"]}]}, {"zh": "总是追逐着虚幻易碎的事物", "tokens": [{"text": "儚く", "reading": "はかなく", "romaji": "hakanaku", "gloss": "虚幻地", "kanaChars": ["は", "か", "な", "く"]}, {"text": "壊れやすい", "reading": "こわれやすい", "romaji": "kowareyasui", "gloss": "容易破碎的", "kanaChars": ["こ", "わ", "れ", "や", "す", "い"]}, {"text": "もの", "reading": "もの", "romaji": "mono", "gloss": "事物", "kanaChars": ["も", "の"]}, {"text": "ばかり", "reading": "ばかり", "romaji": "bakari", "gloss": "净是", "kanaChars": ["ば", "か", "り"]}]}, {"zh": "苦苦执着不肯放手", "tokens": [{"text": "追い求めて", "reading": "おいもとめて", "romaji": "oimotomete", "gloss": "苦苦追求", "kanaChars": ["お", "い", "も", "と", "め", "て"]}, {"text": "しまう", "reading": "しまう", "romaji": "shimau", "gloss": "（无奈语气）", "kanaChars": ["し", "ま", "う"]}]}, {"zh": "一次又一次", "tokens": [{"text": "Time after time", "reading": "Time after time", "romaji": "Time after time", "gloss": "一次又一次", "kanaChars": []}]}, {"zh": "倘若能在繁花浸染的街头与你重逢", "tokens": [{"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "と", "reading": "と", "romaji": "to", "gloss": "和", "kanaChars": ["と"]}, {"text": "色づく", "reading": "いろづく", "romaji": "irozuku", "gloss": "染上色彩", "kanaChars": ["い", "ろ", "づ", "く"]}, {"text": "街", "reading": "まち", "romaji": "machi", "gloss": "街道", "kanaChars": ["ま", "ち"]}, {"text": "で", "reading": "で", "romaji": "de", "gloss": "在", "kanaChars": ["で"]}]}, {"zh": "便不再需要任何约定", "tokens": [{"text": "出逢えたら", "reading": "であえたら", "romaji": "deaetara", "gloss": "如果能相遇的话", "kanaChars": ["で", "あ", "え", "た", "ら"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "もう", "reading": "もう", "romaji": "mou", "gloss": "已经/不再", "kanaChars": ["も", "う"]}, {"text": "約束", "reading": "やくそく", "romaji": "yakusoku", "gloss": "约定", "kanaChars": ["や", "く", "そ", "く"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "いらない", "reading": "いらない", "romaji": "iranai", "gloss": "不需要", "kanaChars": ["い", "ら", "な", "い"]}]}, {"zh": "只想永远守在比谁都容易受伤的你的身旁", "tokens": [{"text": "誰よりも", "reading": "だれよりも", "romaji": "dare yori mo", "gloss": "比任何人都", "kanaChars": ["だ", "れ", "よ", "り", "も"]}, {"text": "ずっと", "reading": "ずっと", "romaji": "zutto", "gloss": "更加", "kanaChars": ["ず", "と"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "傷つきやすい", "reading": "きずつきやすい", "romaji": "kizutsukiyasui", "gloss": "容易受伤的", "kanaChars": ["き", "ず", "つ", "き", "や", "す", "い"]}, {"text": "君", "reading": "きみ", "romaji": "kimi", "gloss": "你", "kanaChars": ["き", "み"]}, {"text": "の", "reading": "の", "romaji": "no", "gloss": "的", "kanaChars": ["の"]}]}, {"zh": "这一次 一定不再离开", "tokens": [{"text": "そばにいたい", "reading": "そばにいたい", "romaji": "soba ni itai", "gloss": "想在你身边", "kanaChars": ["そ", "ば", "に", "い", "た", "い"]}, {"text": " ", "reading": " ", "romaji": " ", "gloss": "", "kanaChars": []}, {"text": "今度", "reading": "こんど", "romaji": "kondo", "gloss": "这次", "kanaChars": ["こ", "ん", "ど"]}, {"text": "は", "reading": "は", "romaji": "ha(wa)", "gloss": "（主题）", "kanaChars": ["は"]}, {"text": "きっと", "reading": "きっと", "romaji": "kitto", "gloss": "一定", "kanaChars": ["き", "と"]}]}]}];
+
+  /* ===================== 状态 ===================== */
+  var state = {
+    page: 'home',
+    songs: [],
+    currentSongId: null,
+    currentTab: 'sei',
+    selectedKana: null,
+    settings: { provider: 'claude', keys: { openai:'', gemini:'', deepseek:'' } },
+    kanaCycle: {},
+    wordCycle: {},
+    kanaWordIndex: {},
+    kanaLineIndex: {},
+    kanaCount: {}
+  };
+
+  /* ===================== storage 封装 ===================== */
+  async function storeGet(key){
+    try{ var r = await window.storage.get(key, false); return r ? JSON.parse(r.value) : null; }catch(e){ return null; }
+  }
+  async function storeSet(key, val){
+    try{ await window.storage.set(key, JSON.stringify(val), false); }catch(e){ /* best effort */ }
+  }
+
+  /* ===================== toast ===================== */
+  function toast(msg){
+    var wrap = document.getElementById('toast-wrap');
+    var el = document.createElement('div'); el.className='toast'; el.textContent=msg;
+    wrap.appendChild(el); setTimeout(function(){ el.remove(); }, 3400);
+  }
+  function escapeHtml(s){
+    return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+  }
+
+  /* ===================== index building ===================== */
+  function rebuildIndex(){
+    var wordIdx = {}, lineIdx = {}, count = {};
+    state.songs.forEach(function(song){
+      (song.lines||[]).forEach(function(line, li){
+        var jpFull = (line.tokens||[]).map(function(t){return t.text;}).join('');
+        var lineKanaSet = {};
+        (line.tokens||[]).forEach(function(tok, ti){
+          (tok.kanaChars||[]).forEach(function(k){
+            if(!ALL_VALID_KANA[k]) return;
+            count[k] = (count[k]||0)+1;
+            if(!wordIdx[k]) wordIdx[k]=[];
+            var entry = wordIdx[k].filter(function(w){ return w.text===tok.text && w.reading===tok.reading; })[0];
+            if(!entry && tok.text.trim()!==''){
+              entry = {text:tok.text, reading:tok.reading, romaji:tok.romaji, gloss:tok.gloss, occurrences:[]};
+              wordIdx[k].push(entry);
+            }
+            if(entry){
+              var dup = entry.occurrences.some(function(o){ return o.songId===song.id && o.lineIdx===li; });
+              if(!dup) entry.occurrences.push({songId:song.id, songTitle:song.title, lineIdx:li});
+            }
+            lineKanaSet[k] = true;
+          });
+        });
+        Object.keys(lineKanaSet).forEach(function(k){
+          if(!lineIdx[k]) lineIdx[k]=[];
+          lineIdx[k].push({songId:song.id, songTitle:song.title, lineIdx:li, jp:jpFull, zh:line.zh});
+        });
+      });
+    });
+    state.kanaWordIndex = wordIdx;
+    state.kanaLineIndex = lineIdx;
+    state.kanaCount = count;
+  }
+
+  function jumpToLine(songId, lineIdx){
+    state.page = 'lyrics'; state.currentSongId = songId;
+    renderTopTabs(); renderPage();
+    requestAnimationFrame(function(){
+      var el = document.getElementById('line-'+songId+'-'+lineIdx);
+      if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.classList.add('pulse-line');
+        setTimeout(function(){ el.classList.remove('pulse-line'); }, 1600); }
+    });
+  }
+
+  /* ===================== 页面切换 ===================== */
+  function renderTopTabs(){
+    var el = document.getElementById('pageTabs');
+    Array.prototype.forEach.call(el.querySelectorAll('.page-tab'), function(b){
+      b.classList.toggle('active', b.getAttribute('data-page')===state.page);
+      b.onclick = function(){ state.page = b.getAttribute('data-page'); renderTopTabs(); renderPage(); };
+    });
+  }
+
+  function renderPage(){
+    var main = document.getElementById('mainArea');
+    if(state.page === 'home'){
+      var songCount = state.songs.length;
+      var kanaCount = Object.keys(state.kanaCount).length;
+      main.innerHTML =
+        '<div class="cover-page">'+
+          '<div class="cover-title">うたがな</div>'+
+          '<div class="cover-sub">五十音 × 你的歌单</div>'+
+          '<div class="cover-stats">'+
+            '<div><b>'+kanaCount+' / '+TOTAL_KANA_COUNT+'</b>已收录假名</div>'+
+            '<div><b>'+songCount+'</b>首歌</div>'+
+          '</div>'+
+          '<div class="cover-cards">'+
+            '<button class="cover-card" data-page="kana"><div class="cc-icon">あ</div><div class="cc-title">假名</div><div class="cc-desc">点一个假名，看单词和歌词</div></button>'+
+            '<button class="cover-card" data-page="lyrics"><div class="cc-icon">♪</div><div class="cc-title">歌词</div><div class="cc-desc">带注音、带翻译地读一首歌</div></button>'+
+          '</div>'+
+        '</div>';
+      Array.prototype.forEach.call(main.querySelectorAll('.cover-card'), function(b){
+        b.addEventListener('click', function(){ state.page = b.getAttribute('data-page'); renderTopTabs(); renderPage(); });
+      });
+      return;
+    }
+    if(state.page === 'kana'){
+      main.innerHTML =
+        '<div class="kana-page">'+
+          '<section class="pane" id="keypadPane">'+
+            '<div class="progress-row"><span id="progressLabel"></span><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div>'+
+            '<div class="tabs" id="tabs"></div>'+
+            '<div class="kgrid" id="kgrid"></div>'+
+          '</section>'+
+          '<section class="pane" id="detailPane"></section>'+
+        '</div>';
+      renderTabs(); renderKeypad(); renderProgress(); renderDetail();
+    } else {
+      main.innerHTML =
+        '<div class="lyrics-page">'+
+          '<div class="toggle-line"><input type="checkbox" id="romajiToggle"/><label for="romajiToggle">显示罗马字</label></div>'+
+          '<div class="songlist" id="songlist"></div>'+
+          '<div id="lyricsWrap"></div>'+
+        '</div>';
+      document.getElementById('romajiToggle').addEventListener('change', renderLyrics);
+      renderSonglist(); renderLyrics();
+    }
+  }
+
+  /* ===================== keypad (kana page) ===================== */
+  function renderProgress(){
+    var total = Object.keys(state.kanaCount).length;
+    document.getElementById('progressLabel').textContent = '已收录 '+total+' / '+TOTAL_KANA_COUNT+' 个假名';
+    document.getElementById('progressFill').style.width = (100*total/TOTAL_KANA_COUNT)+'%';
+  }
+
+  function renderTabs(){
+    var tabs = [['sei','清音'],['daku','浊音・半浊音'],['youon','拗音']];
+    var el = document.getElementById('tabs');
+    el.innerHTML = tabs.map(function(t){
+      return '<button class="tab-btn'+(state.currentTab===t[0]?' active':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.tab-btn'), function(b){
+      b.addEventListener('click', function(){ state.currentTab = b.getAttribute('data-tab'); renderTabs(); renderKeypad(); });
+    });
+  }
+
+  function currentGrid(){
+    if(state.currentTab==='sei') return SEION;
+    if(state.currentTab==='daku') return DAKU;
+    return YOUON;
+  }
+
+  function renderKeypad(){
+    var grid = currentGrid();
+    var rowLabels = ROW_LABELS[state.currentTab];
+    var colLabels = COL_LABELS[state.currentTab];
+    var numCols = grid[0].length;
+    var gEl = document.getElementById('kgrid');
+    gEl.className = 'kgrid ' + state.currentTab;
+    gEl.style.gridTemplateColumns = '26px repeat('+numCols+', 1fr)';
+
+    var cells = ['<div class="klabel corner"></div>'];
+    colLabels.forEach(function(c){ cells.push('<div class="klabel col">'+c+'</div>'); });
+    grid.forEach(function(row, ri){
+      cells.push('<div class="klabel row">'+(rowLabels[ri]||'')+'</div>');
+      row.forEach(function(k){
+        if(!k){ cells.push('<div class="kbtn empty"></div>'); return; }
+        var n = state.kanaCount[k]||0;
+        var cls = 'kbtn' + (n?' has-hits':'') + (state.selectedKana===k?' selected':'');
+        cells.push('<button class="'+cls+'" data-kana="'+k+'" title="'+k+(n?(' · '+n+'处'):'')+'">'+k+'</button>');
+      });
+    });
+    gEl.innerHTML = cells.join('');
+
+    Array.prototype.forEach.call(gEl.querySelectorAll('.kbtn[data-kana]'), function(b){
+      b.addEventListener('click', function(){
+        state.selectedKana = b.getAttribute('data-kana');
+        renderKeypad(); renderDetail();
+        requestAnimationFrame(function(){
+          var sel = gEl.querySelector('.kbtn.selected');
+          if(sel){ sel.classList.add('pulse'); setTimeout(function(){ sel.classList.remove('pulse'); }, 500); }
+          var pane = document.getElementById('detailPane');
+          if(pane) pane.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
+    });
+  }
+
+  function renderDetail(){
+    var pane = document.getElementById('detailPane');
+    var k = state.selectedKana;
+    if(!k){
+      pane.innerHTML = '<div class="detail-empty">点一个假名，看看它的读音、相关单词和歌词</div>';
+      return;
+    }
+    var romaji = ROMAJI_MAP[k] || '';
+    var words = state.kanaWordIndex[k] || [];
+    var lines = state.kanaLineIndex[k] || [];
+
+    var html = '<div class="detail-head"><div class="detail-kana">'+k+'</div><div class="detail-romaji">'+romaji+'</div></div>';
+
+    if(!words.length && !lines.length){
+      html += '<div class="detail-empty">这个假名还没在你收录的歌里出现过——加更多歌就会补上</div>';
+    } else {
+      if(words.length){
+        html += '<div class="detail-sec-title">相关单词（点一下可跳去对应歌词）</div><div>';
+        html += words.map(function(w, i){
+          return '<button class="word-chip" data-widx="'+i+'"><span class="w-text">'+escapeHtml(w.text)+'</span>'+
+            '<span class="w-reading">'+escapeHtml(w.reading)+'</span>'+
+            '<span class="w-gloss">'+escapeHtml(w.gloss||'')+'</span></button>';
+        }).join('');
+        html += '</div>';
+      }
+      if(lines.length){
+        html += '<div class="detail-sec-title">相关歌词</div>';
+        html += lines.map(function(l, i){
+          return '<div class="line-card">'+
+            '<div class="lc-jp">'+escapeHtml(l.jp)+'</div>'+
+            '<div class="lc-zh">'+escapeHtml(l.zh||'')+'</div>'+
+            '<div class="lc-meta"><span>'+escapeHtml(l.songTitle)+'</span>'+
+            '<button class="lc-jump" data-idx="'+i+'">在歌词页查看 →</button></div>'+
+          '</div>';
+        }).join('');
+      }
+    }
+    pane.innerHTML = html;
+
+    Array.prototype.forEach.call(pane.querySelectorAll('.lc-jump'), function(b){
+      b.addEventListener('click', function(){
+        var l = lines[+b.getAttribute('data-idx')];
+        jumpToLine(l.songId, l.lineIdx);
+      });
+    });
+    Array.prototype.forEach.call(pane.querySelectorAll('.word-chip'), function(b){
+      b.addEventListener('click', function(){
+        var w = words[+b.getAttribute('data-widx')];
+        var occ = w.occurrences || [];
+        if(!occ.length) return;
+        var cycleKey = k+'|'+w.text+'|'+w.reading;
+        var ptr = state.wordCycle[cycleKey] || 0;
+        var o = occ[ptr % occ.length];
+        state.wordCycle[cycleKey] = ptr + 1;
+        jumpToLine(o.songId, o.lineIdx);
+      });
+    });
+  }
+
+  /* ===================== 歌单 / 歌词 (lyrics page) ===================== */
+  function renderSonglist(){
+    var el = document.getElementById('songlist');
+    var html = state.songs.map(function(s){
+      return '<button class="song-chip'+(s.id===state.currentSongId?' active':'')+'" data-id="'+s.id+'">'+escapeHtml(s.title)+'</button>';
+    }).join('');
+    html += '<button class="add-song-chip" id="addSongChip">＋ 收录新歌</button>';
+    el.innerHTML = html;
+    Array.prototype.forEach.call(el.querySelectorAll('.song-chip'), function(b){
+      b.addEventListener('click', function(){ state.currentSongId = b.getAttribute('data-id'); renderSonglist(); renderLyrics(); });
+    });
+    document.getElementById('addSongChip').addEventListener('click', openAddSongModal);
+  }
+
+  function renderLyrics(){
+    var wrap = document.getElementById('lyricsWrap');
+    if(!wrap) return;
+    var song = state.songs.find(function(s){ return s.id===state.currentSongId; });
+    if(!song){
+      wrap.innerHTML = '<div class="empty-state">还没有收录任何歌<br/>点上面「＋ 收录新歌」，把第一首歌加进来</div>';
+      return;
+    }
+    var romajiEl = document.getElementById('romajiToggle');
+    var romajiOn = romajiEl ? romajiEl.checked : false;
+    var html = '<div class="lyrics'+(romajiOn?' show-romaji':'')+'">';
+    html += '<div class="song-meta"><div class="sm-top"><h2>'+escapeHtml(song.title)+'</h2>'+
+      '<button class="delete-song-btn" id="deleteSongBtn" title="删除这首歌">删除这首歌</button></div>';
+    if(song.artist) html += '<div class="artist">'+escapeHtml(song.artist)+'</div>';
+    html += '</div>';
+
+    (song.lines||[]).forEach(function(line, li){
+      html += '<div class="lyrics-line" id="line-'+song.id+'-'+li+'">';
+      html += '<div class="jp-row">';
+      (line.tokens||[]).forEach(function(tok, ti){
+        var id = 'tok-'+song.id+'-'+li+'-'+ti;
+        if(tok.text.trim()===''){ html += escapeHtml(tok.text); return; }
+        var needsRuby = tok.reading && tok.reading !== tok.text;
+        if(needsRuby){
+          html += '<ruby class="tok" id="'+id+'" data-li="'+li+'" data-ti="'+ti+'">'+escapeHtml(tok.text)+'<rt>'+escapeHtml(tok.reading)+'</rt></ruby>';
+        } else if(tok.gloss || tok.romaji){
+          html += '<span class="tok-plain tok" id="'+id+'" data-li="'+li+'" data-ti="'+ti+'">'+escapeHtml(tok.text)+'</span>';
+        } else {
+          html += escapeHtml(tok.text);
+        }
+      });
+      html += '</div>';
+      html += '<div class="romaji-row">'+ (line.tokens||[]).map(function(t){return t.romaji||'';}).join(' ') +'</div>';
+      if(line.zh) html += '<div class="zh-row">'+escapeHtml(line.zh)+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+
+    Array.prototype.forEach.call(wrap.querySelectorAll('.tok'), function(el){
+      el.addEventListener('click', function(){
+        var li = +el.getAttribute('data-li'), ti = +el.getAttribute('data-ti');
+        var tok = song.lines[li].tokens[ti];
+        openTokenPopover(el, tok);
+      });
+    });
+    var delBtn = document.getElementById('deleteSongBtn');
+    if(delBtn) delBtn.addEventListener('click', function(){ handleDeleteSong(song.id, song.title); });
+  }
+
+  async function handleDeleteSong(songId, title){
+    if(!confirm('删除「'+title+'」？它带来的单词和例句也会一起从假名页消失，删了就找不回来了。')) return;
+    state.songs = state.songs.filter(function(s){ return s.id !== songId; });
+    await storeSet('songs-library', state.songs);
+    rebuildIndex();
+    if(state.currentSongId === songId){
+      state.currentSongId = state.songs.length ? state.songs[0].id : null;
+    }
+    renderSonglist(); renderLyrics();
+    toast('「'+title+'」已删除');
+  }
+
+  /* ===================== token popover ===================== */
+  function closePopover(){
+    var p = document.getElementById('tokPopover');
+    if(p) p.remove();
+    document.removeEventListener('click', outsidePopoverClick, true);
+  }
+  function outsidePopoverClick(e){
+    var p = document.getElementById('tokPopover');
+    if(p && !p.contains(e.target)) closePopover();
+  }
+  function openTokenPopover(anchorEl, tok){
+    closePopover();
+    var p = document.createElement('div'); p.className='popover'; p.id='tokPopover';
+    var kanas = (tok.kanaChars||[]).filter(function(k){ return ALL_VALID_KANA[k]; });
+    p.innerHTML =
+      '<div class="pv-reading">'+escapeHtml(tok.reading||tok.text)+'</div>'+
+      (tok.gloss ? '<div class="pv-gloss">'+escapeHtml(tok.gloss)+'</div>' : '') +
+      (tok.romaji ? '<div class="pv-romaji">'+escapeHtml(tok.romaji)+'</div>' : '') +
+      '<div class="pv-kanas">' + kanas.map(function(k){ return '<button class="pv-kana-btn" data-k="'+k+'">'+k+' →</button>'; }).join('') + '</div>';
+    document.body.appendChild(p);
+    var r = anchorEl.getBoundingClientRect();
+    var top = r.bottom + 8, left = r.left;
+    if(left + 220 > window.innerWidth) left = window.innerWidth - 230;
+    p.style.top = top + 'px'; p.style.left = left + 'px';
+    Array.prototype.forEach.call(p.querySelectorAll('.pv-kana-btn'), function(b){
+      b.addEventListener('click', function(){ jumpToKeypad(b.getAttribute('data-k')); });
+    });
+    setTimeout(function(){ document.addEventListener('click', outsidePopoverClick, true); }, 10);
+  }
+
+  function jumpToKeypad(kana){
+    var t = tabOf(kana);
+    if(!t) return;
+    closePopover();
+    state.page = 'kana'; state.currentTab = t; state.selectedKana = kana;
+    renderTopTabs(); renderPage();
+    requestAnimationFrame(function(){
+      var pane = document.getElementById('detailPane');
+      if(pane) pane.scrollIntoView({behavior:'auto', block:'start'});
+    });
+  }
+
+  /* ===================== 添加新歌 modal ===================== */
+  function openAddSongModal(){
+    var root = document.getElementById('modalRoot');
+    root.innerHTML =
+      '<div class="overlay" id="addOverlay"><div class="modal">'+
+        '<h3>收录新歌</h3>'+
+        '<div class="field"><label>歌名</label><input type="text" id="asTitle" placeholder="比如：夜に駆ける"/></div>'+
+        '<div class="field"><label>歌手（选填）</label><input type="text" id="asArtist" placeholder=""/></div>'+
+        '<div class="field"><label>粘贴歌词原文（可以带汉字，逐行粘贴）</label><textarea id="asLyrics" placeholder="沈むように溶けてゆくように&#10;二人だけの空が広がる夜に&#10;……"></textarea></div>'+
+        '<div id="asStatus"></div>'+
+        '<div class="modal-actions"><button class="btn" id="asCancel">取消</button><button class="btn primary" id="asParse">开始解析</button></div>'+
+      '</div></div>';
+    document.getElementById('asCancel').addEventListener('click', function(){ root.innerHTML=''; });
+    document.getElementById('addOverlay').addEventListener('click', function(e){ if(e.target.id==='addOverlay') root.innerHTML=''; });
+    document.getElementById('asParse').addEventListener('click', handleParseSong);
+  }
+
+  function buildParsePrompt(rawLyrics){
+    return '你是日语教学助手。请把下面的歌词逐行拆成词/字单元，给出每个单元的读音（统一用平假名，即使原文是片假名或汉字）、罗马字、简短的中文释义，以及它包含的"有效假名单元"列表；同时给每一行配一句准确、自然的中文翻译。\n'+
+'有效假名单元只能是以下这些（拗音必须整体作为一个单元，比如"きゃ"是一个单元，不要拆成"き"+"ゃ"）：\n'+
+'清音: あいうえお かきくけこ さしすせそ たちつてと なにぬねの はひふへほ まみむめも やゆよ らりるれろ わを ん\n'+
+'浊音/半浊音: がぎぐげご ざじずぜぞ だぢづでど ばびぶべぼ ぱぴぷぺぽ\n'+
+'拗音: きゃきゅきょ ぎゃぎゅぎょ しゃしゅしょ じゃじゅじょ ちゃちゅちょ にゃにゅにょ ひゃひゅひょ びゃびゅびょ ぴゃぴゅぴょ みゃみゅみょ りゃりゅりょ\n'+
+'长音符"ー"、促音"っ"、标点符号等不属于上面列表的部分不要放进 kanaChars，但可以正常出现在 reading 字符串里；标点符号单独成一个 token，reading/romaji/gloss 都留空，kanaChars 为空数组。\n'+
+'只输出 JSON，不要输出任何其他文字、不要用 markdown 代码块包裹。JSON 结构：\n'+
+'{"lines":[{"zh":"这一行的中文翻译","tokens":[{"text":"原文片段","reading":"平假名读音","romaji":"罗马字","gloss":"简短中文释义（若是标点或空格则留空）","kanaChars":["构成它的有效假名单元们"]}]}]}\n\n'+
+'歌词原文：\n' + rawLyrics;
+  }
+
+  async function callLLM(prompt){
+    var s = state.settings;
+    if(s.provider === 'claude'){
+      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens: 4000, messages:[{role:'user', content: prompt}] })
+      });
+      if(!resp.ok) throw new Error('Claude 接口出错 ('+resp.status+')');
+      var data = await resp.json();
+      var textBlock = (data.content||[]).find(function(b){ return b.type==='text'; });
+      if(!textBlock) throw new Error('Claude 没有返回文本内容');
+      return textBlock.text;
+    }
+    if(s.provider === 'openai'){
+      if(!s.keys.openai) throw new Error('还没填 OpenAI 的 API Key');
+      var resp2 = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.keys.openai},
+        body: JSON.stringify({ model:'gpt-4o-mini', messages:[{role:'user', content: prompt}] })
+      });
+      if(!resp2.ok) throw new Error('OpenAI 接口出错 ('+resp2.status+')');
+      var data2 = await resp2.json();
+      return data2.choices[0].message.content;
+    }
+    if(s.provider === 'gemini'){
+      if(!s.keys.gemini) throw new Error('还没填 Gemini 的 API Key');
+      var resp3 = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(s.keys.gemini), {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
+      });
+      if(!resp3.ok) throw new Error('Gemini 接口出错 ('+resp3.status+')');
+      var data3 = await resp3.json();
+      return data3.candidates[0].content.parts[0].text;
+    }
+    if(s.provider === 'deepseek'){
+      if(!s.keys.deepseek) throw new Error('还没填 DeepSeek 的 API Key');
+      var resp4 = await fetch('https://api.deepseek.com/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.keys.deepseek},
+        body: JSON.stringify({ model:'deepseek-chat', messages:[{role:'user', content: prompt}] })
+      });
+      if(!resp4.ok) throw new Error('DeepSeek 接口出错 ('+resp4.status+')');
+      var data4 = await resp4.json();
+      return data4.choices[0].message.content;
+    }
+    throw new Error('未知的解析引擎');
+  }
+
+  function extractJson(text){
+    var cleaned = text.replace(/```json/gi,'').replace(/```/g,'').trim();
+    var start = cleaned.indexOf('{'); var end = cleaned.lastIndexOf('}');
+    if(start===-1 || end===-1) throw new Error('没在返回内容里找到 JSON');
+    return JSON.parse(cleaned.slice(start, end+1));
+  }
+
+  async function handleParseSong(){
+    var title = document.getElementById('asTitle').value.trim();
+    var artist = document.getElementById('asArtist').value.trim();
+    var raw = document.getElementById('asLyrics').value.trim();
+    var statusEl = document.getElementById('asStatus');
+    var btn = document.getElementById('asParse');
+    if(!title){ toast('先给这首歌起个名字'); return; }
+    if(!raw){ toast('还没粘贴歌词'); return; }
+
+    btn.disabled = true;
+    statusEl.innerHTML = '<div class="loading-row"><div class="spinner"></div>正在拆解假名与读音…</div>';
+
+    try{
+      var text = await callLLM(buildParsePrompt(raw));
+      var parsed = extractJson(text);
+      if(!parsed.lines || !Array.isArray(parsed.lines)) throw new Error('返回的数据结构不对');
+
+      var song = {
+        id: 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        title: title, artist: artist, addedAt: Date.now(),
+        lines: parsed.lines.map(function(l){
+          return { zh: l.zh || '', tokens: (l.tokens||[]).map(function(t){
+            return {
+              text: t.text||'', reading: t.reading||t.text||'', romaji: t.romaji||'', gloss: t.gloss||'',
+              kanaChars: Array.isArray(t.kanaChars) ? t.kanaChars.filter(function(k){return ALL_VALID_KANA[k];}) : []
+            };
+          })};
+        })
+      };
+
+      state.songs.unshift(song);
+      await storeSet('songs-library', state.songs);
+      rebuildIndex();
+      state.currentSongId = song.id;
+      document.getElementById('modalRoot').innerHTML = '';
+      renderPage();
+      toast('「'+title+'」收录好了');
+    }catch(err){
+      statusEl.innerHTML = '<div style="color:var(--plum);font-size:13px;margin-top:6px;">解析失败：'+escapeHtml(err.message||String(err))+'，可以到设置里换个引擎试试</div>';
+      btn.disabled = false;
+    }
+  }
+
+  /* ===================== 设置 modal ===================== */
+  function openSettingsModal(){
+    var s = state.settings;
+    var root = document.getElementById('modalRoot');
+    var providers = [['claude','Claude（默认，无需填 Key）',false],['openai','OpenAI',true],['gemini','Gemini',true],['deepseek','DeepSeek',true]];
+    var radioHtml = providers.map(function(p){
+      return '<label class="radio-opt'+(s.provider===p[0]?' selected':'')+'">'+
+        '<input type="radio" name="provider" value="'+p[0]+'" '+(s.provider===p[0]?'checked':'')+'/>'+
+        '<span>'+p[1]+'</span>'+(p[2]?'<span class="tag">需要 Key</span>':'') + '</label>';
+    }).join('');
+
+    root.innerHTML =
+      '<div class="overlay" id="setOverlay"><div class="modal">'+
+        '<h3>设置</h3>'+
+        '<div class="field"><label>解析引擎</label><div class="radio-row">'+radioHtml+'</div></div>'+
+        '<div class="field"><label>OpenAI API Key</label><input type="password" id="keyOpenai" value="'+escapeHtml(s.keys.openai)+'"/></div>'+
+        '<div class="field"><label>Gemini API Key</label><input type="password" id="keyGemini" value="'+escapeHtml(s.keys.gemini)+'"/></div>'+
+        '<div class="field"><label>DeepSeek API Key</label><input type="password" id="keyDeepseek" value="'+escapeHtml(s.keys.deepseek)+'"/></div>'+
+        '<div id="testStatus"></div>'+
+        '<div class="modal-actions"><button class="btn" id="setTest">测试当前引擎</button><button class="btn" id="setCancel">取消</button><button class="btn primary" id="setSave">保存</button></div>'+
+      '</div></div>';
+
+    Array.prototype.forEach.call(root.querySelectorAll('input[name=provider]'), function(r){
+      r.addEventListener('change', function(){
+        Array.prototype.forEach.call(root.querySelectorAll('.radio-opt'), function(el){ el.classList.remove('selected'); });
+        r.closest('.radio-opt').classList.add('selected');
+      });
+    });
+    document.getElementById('setCancel').addEventListener('click', function(){ root.innerHTML=''; });
+    document.getElementById('setOverlay').addEventListener('click', function(e){ if(e.target.id==='setOverlay') root.innerHTML=''; });
+
+    document.getElementById('setTest').addEventListener('click', async function(){
+      var provider = root.querySelector('input[name=provider]:checked').value;
+      var tmp = { provider: provider, keys: {
+        openai: document.getElementById('keyOpenai').value.trim(),
+        gemini: document.getElementById('keyGemini').value.trim(),
+        deepseek: document.getElementById('keyDeepseek').value.trim()
+      }};
+      var old = state.settings; state.settings = tmp;
+      var statusEl = document.getElementById('testStatus');
+      statusEl.innerHTML = '<div class="loading-row"><div class="spinner"></div>测试中…</div>';
+      try{
+        var t = await callLLM('只回复两个字：OK');
+        statusEl.innerHTML = '<div style="color:#7bc47f;font-size:13px;margin-top:6px;">连通了 → '+escapeHtml(t.trim().slice(0,20))+'</div>';
+      }catch(err){
+        statusEl.innerHTML = '<div style="color:var(--plum);font-size:13px;margin-top:6px;">没通：'+escapeHtml(err.message||String(err))+'</div>';
+      }
+      state.settings = old;
+    });
+
+    document.getElementById('setSave').addEventListener('click', async function(){
+      var provider = root.querySelector('input[name=provider]:checked').value;
+      state.settings = { provider: provider, keys: {
+        openai: document.getElementById('keyOpenai').value.trim(),
+        gemini: document.getElementById('keyGemini').value.trim(),
+        deepseek: document.getElementById('keyDeepseek').value.trim()
+      }};
+      await storeSet('settings', state.settings);
+      root.innerHTML = ''; toast('设置保存好了');
+    });
+  }
+
+  document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+  function goHome(){ state.page = 'home'; renderTopTabs(); renderPage(); }
+  document.getElementById('homeBtn').addEventListener('click', goHome);
+  document.getElementById('brandHome').addEventListener('click', goHome);
+
+  /* ===================== 初始化 ===================== */
+  async function init(){
+    var savedSongs = await storeGet('songs-library');
+    var savedSettings = await storeGet('settings');
+    if(Array.isArray(savedSongs) && savedSongs.length){
+      state.songs = savedSongs;
+    } else {
+      state.songs = PRELOADED_SONGS;
+      await storeSet('songs-library', state.songs);
+    }
+    if(savedSettings) state.settings = savedSettings;
+    if(state.songs.length) state.currentSongId = state.songs[0].id;
+
+    rebuildIndex();
+    renderTopTabs();
+    renderPage();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
